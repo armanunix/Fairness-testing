@@ -2,3 +2,6 @@
 *.csv
 *.csv#
 *.npy
+*.odt
+*.odt#
+*.npy
