@@ -31,7 +31,36 @@ class census:
 
     # specify the categorical features with their indices
     categorical_features = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+class diabetes:
+    """
+    Configuration of dataset diabetes
+    """
 
+    # the size of total features
+    params = 8
+
+    # the valid religion of each feature
+    input_bounds = []
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9]) 
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9])
+    input_bounds.append([1, 9])
+
+    # the name of each feature
+    feature_name = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
+       'BMI', 'DiabetesPedigreeFunction', 'Age']
+
+    # the name of each class
+    class_name = ["not disease", "disease"]
+
+    # specify the categorical features with their indices
+    categorical_features = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    
 class credit:
     """
     Configuration of dataset German Credit

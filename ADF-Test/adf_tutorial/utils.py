@@ -17,13 +17,14 @@ from adf_data.bank import bank_data
 from adf_data.compas import compas_data
 from adf_data.default import default_data
 from adf_data.heart import heart_data
+from adf_data.diabetes import diabetes_data
 
 from adf_utils.utils_tf import model_loss
 
 FLAGS = flags.FLAGS
 
-datasets_dict = {'census':census_data, 'credit':credit_data, 'bank': bank_data, 'compas':compas_data, 
-                 'default':default_data, 'heart':heart_data}
+datasets_dict = {"census":census_data, "credit":credit_data, "bank":bank_data, "compas":compas_data, 
+            "default": default_data, "heart":heart_data, "diabetes":diabetes_data}
 
 def cluster(dataset, cluster_num=4):
     """

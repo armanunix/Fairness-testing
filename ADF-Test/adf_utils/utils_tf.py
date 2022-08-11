@@ -254,7 +254,7 @@ def model_argmax(sess, x, predictions, samples, feed=None):
     """
     feed_dict = {x: samples}
     if feed is not None:
-        feed_dict.update(feed)
+        feed_dict.update(feed,predictions)
     probabilities = sess.run(predictions, feed_dict)
 
     if samples.shape[0] == 1:
