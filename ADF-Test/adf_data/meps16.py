@@ -3,7 +3,7 @@ import pandas as pd
 import sys
 sys.path.append("../")
 from sklearn.preprocessing import LabelEncoder
-from adf_utils.meps21 import MEPSDataset21
+from aif360.datasets.meps_dataset_panel21_fy2016 import MEPSDataset21
 cd = MEPSDataset21()
 le = LabelEncoder()
 df = pd.DataFrame(cd.features)
@@ -13,7 +13,7 @@ df[3] = pd.cut(df[0],10, labels=[i for i in range(1,11)])
 df = df.astype('int').drop(columns=[10])
 df[4] = le.fit_transform(df[4])
 
-def meps_data():
+def meps16_data():
     """
     Prepare the data of dataset Census Income
     :return: X, Y, input shape and number of classes
@@ -25,3 +25,4 @@ def meps_data():
     input_shape = (None, len(X[0]))
     nb_classes = 2
     return X, Y, input_shape, nb_classes
+
