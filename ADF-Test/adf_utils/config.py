@@ -247,7 +247,7 @@ class heart:
                                                                       "slope", "ca", "thal"]
 
     # the name of each class
-    class_name = ["disease", "not disease"]
+    class_name = ["not disease", "disease"]
 
     # specify the categorical features with their indices
     categorical_features = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
