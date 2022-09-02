@@ -28,3 +28,8 @@ The baseline tools can be found inside DAIKE baseline:
 cd DAIKE/DAIKE_baseline
 ```
 
+The data of analysis can be found in:
+```
+cd DAIKE/results
+```
+There is one folder for each experiments that include DAIKE and the state-of-the-art outcomes.
