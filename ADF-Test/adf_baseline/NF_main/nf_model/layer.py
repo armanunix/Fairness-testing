@@ -27,7 +27,7 @@ class Linear(Layer):
         with tf.name_scope("linear"):
             self.W = tf.Variable(init, name='kernel')
             self.b = tf.Variable(np.zeros((self.num_hid,)).astype('float32'), name='bias')
-
+            
     def fprop(self, x):
         return tf.matmul(x, self.W) + self.b
             

@@ -21,6 +21,6 @@ def dnn(input_shape=(None, 13), nb_classes=2):
               activation(),
               Linear(nb_classes),
               Softmax()]
-
+       
     model = MLP(layers, input_shape)
     return model

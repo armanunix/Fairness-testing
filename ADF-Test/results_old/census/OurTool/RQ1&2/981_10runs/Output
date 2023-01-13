@@ -1,0 +1,598 @@
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Time to find the 1st discrimination 0.003
+Total Time = 3609.055577278137
+time 3848.675612449646
+Global disc = 13734
+local disc  = 11856780
+Total loc samples  =  229385
+Total glob samples =  424
+Total Dis =  11870514
+Total Dis ADF  =  5111998
+Total Dis ADF G =  4101
+Total Dis ADF L =  5107897
+Local search success rate =  57.43270048172286 %
+Global search success rate =  35.990566037735846 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0801 18:42:16.588585 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Input  44
+Time to find the 1st discrimination 0.0035
+Total Time = 3602.1910135746
+time 3841.4211387634277
+Global disc = 11923
+local disc  = 12278039
+Total loc samples  =  229259
+Total glob samples =  464
+Total Dis =  12289962
+Total Dis ADF  =  4823538
+Total Dis ADF G =  2902
+Total Dis ADF L =  4820636
+Local search success rate =  59.50591058826722 %
+Global search success rate =  28.55124521072797 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0801 19:46:18.146379 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Input  44
+Input  45
+Input  46
+Input  47
+Input  48
+Time to find the 1st discrimination 0.0029
+Total Time = 3605.5187180042267
+time 3845.9929854869843
+Global disc = 11861
+local disc  = 12110991
+Total loc samples  =  231210
+Total glob samples =  512
+Total Dis =  12122852
+Total Dis ADF  =  4828245
+Total Dis ADF G =  3230
+Total Dis ADF L =  4825015
+Local search success rate =  58.20101495033375 %
+Global search success rate =  25.74001736111111 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0801 20:50:24.278954 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Input  44
+Input  45
+Time to find the 1st discrimination 0.0028
+Total Time = 3607.3625938892365
+time 3846.381548643112
+Global disc = 14494
+local disc  = 12050460
+Total loc samples  =  230027
+Total glob samples =  475
+Total Dis =  12064954
+Total Dis ADF  =  4985122
+Total Dis ADF G =  4364
+Total Dis ADF L =  4980758
+Local search success rate =  58.207949501580245 %
+Global search success rate =  33.904093567251465 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0801 21:54:30.797341 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Time to find the 1st discrimination 0.0029
+Total Time = 3604.7338585853577
+time 3843.241058111191
+Global disc = 12863
+local disc  = 12283533
+Total loc samples  =  228790
+Total glob samples =  450
+Total Dis =  12296396
+Total Dis ADF  =  4906005
+Total Dis ADF G =  3881
+Total Dis ADF L =  4902124
+Local search success rate =  59.65457406355172 %
+Global search success rate =  31.760493827160495 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0801 22:58:34.175788 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+<ipython-input-1-36725426207f>:150: RuntimeWarning: divide by zero encountered in true_divide
+  grad_sum = 1.0 / (abs(ind_grad[0]) + abs(n_ind_grad[0]))
+<ipython-input-1-36725426207f>:155: RuntimeWarning: invalid value encountered in true_divide
+  probs = grad_sum / np.sum(grad_sum)
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Input  44
+Time to find the 1st discrimination 0.0028
+Total Time = 3604.424919605255
+time 3847.3055119514465
+Global disc = 14398
+local disc  = 12352533
+Total loc samples  =  232720
+Total glob samples =  459
+Total Dis =  12366931
+Total Dis ADF  =  5150068
+Total Dis ADF G =  4038
+Total Dis ADF L =  5146030
+Local search success rate =  58.97660994614415 %
+Global search success rate =  34.85354635681433 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0802 00:02:41.634909 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Time to find the 1st discrimination 0.0028
+Total Time = 3607.850172519684
+time 3847.5751671791077
+Global disc = 12852
+local disc  = 12171512
+Total loc samples  =  232334
+Total glob samples =  452
+Total Dis =  12184364
+Total Dis ADF  =  4965538
+Total Dis ADF G =  3751
+Total Dis ADF L =  4961787
+Local search success rate =  58.208881275328714 %
+Global search success rate =  31.5929203539823 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0802 01:06:49.353481 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Time to find the 1st discrimination 0.0027
+Total Time = 3611.204543352127
+time 3846.2193689346313
+Global disc = 14107
+local disc  = 12436621
+Total loc samples  =  227463
+Total glob samples =  435
+Total Dis =  12450728
+Total Dis ADF  =  4854563
+Total Dis ADF G =  3924
+Total Dis ADF L =  4850639
+Local search success rate =  60.75039798902581 %
+Global search success rate =  36.03320561941252 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0802 02:10:55.713287 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Time to find the 1st discrimination 0.0029
+Total Time = 3609.4878005981445
+time 3849.9338223934174
+Global disc = 13473
+local disc  = 12397180
+Total loc samples  =  229911
+Total glob samples =  456
+Total Dis =  12410653
+Total Dis ADF  =  4986635
+Total Dis ADF G =  4314
+Total Dis ADF L =  4982321
+Local search success rate =  59.912942157810825 %
+Global search success rate =  32.828947368421055 %
+INFO:tensorflow:Restoring parameters from ../models/census/test.model
+I0802 03:15:05.785014 139844207802176 saver.py:1399] Restoring parameters from ../models/census/test.model
+Input  0
+Input  1
+Input  2
+Input  3
+Input  4
+Input  5
+Input  6
+Input  7
+Input  8
+Input  9
+Input  10
+Input  11
+Input  12
+Input  13
+Input  14
+Input  15
+Input  16
+Input  17
+Input  18
+Input  19
+Input  20
+Input  21
+Input  22
+Input  23
+Input  24
+Input  25
+Input  26
+Input  27
+Input  28
+Input  29
+Input  30
+Input  31
+Input  32
+Input  33
+Input  34
+Input  35
+Input  36
+Input  37
+Input  38
+Input  39
+Input  40
+Input  41
+Input  42
+Input  43
+Input  44
+Time to find the 1st discrimination 0.0037
+Total Time = 3604.0803821086884
+time 3840.0421328544617
+Global disc = 14219
+local disc  = 12264668
+Total loc samples  =  230252
+Total glob samples =  461
+Total Dis =  12278887
+Total Dis ADF  =  4992935
+Total Dis ADF G =  3815
+Total Dis ADF L =  4989120
+Local search success rate =  59.18475795601728 %
+Global search success rate =  34.270908652687396 %
+An exception has occurred, use %tb to see the full traceback.
+
+SystemExit
