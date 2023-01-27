@@ -1,25 +1,41 @@
 
-import  os
-#import psutil
-# p = psutil.Process(os.getpid())
-# p.cpu_affinity(0)
+
 import numpy as np
 from itertools import product, combinations
 import tensorflow.compat.v1 as tf 
 tf.compat.v1.disable_eager_execution()
-import sys
+import sys, os, shutil
 sys.path.append("../")
 import copy
 import time
 import pandas as pd
 from scipy import stats
 from tensorflow.python.platform import flags
-from adf_data.bank import bank_data
-from adf_model.tutorial_models import dnn
-from adf_utils.utils_tf import model_prediction, model_argmax , layer_out, model_eval
-from adf_utils.config import bank
+from DICE_data.census import census_data
+from DICE_data.credit import credit_data
+from DICE_data.compas import compas_data
+from DICE_data.default import default_data
+from DICE_data.bank import bank_data
+from DICE_data.heart import heart_data
+from DICE_data.diabetes import diabetes_data
+from DICE_data.students import students_data
+from DICE_data.meps15 import meps15_data
+from DICE_data.meps16 import meps16_data
+from DICE_model.tutorial_models import dnn
+from DICE_utils.utils_tf import model_prediction, model_argmax , layer_out, model_eval
+from DICE_utils.config import census, credit, bank, compas, default, heart, diabetes, students , meps15, meps16
 from IPython.display import clear_output
+import csv
+import argparse
+import re
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-dataset", help='The name of dataset: census, credit, bank, default, meps21 ', required=True)
+parser.add_argument("-sensitive_index", help='The index for sensitive features', required=True)
+parser.add_argument("-timeout", help='Max. running time', default = 3600, required=False)
+parser.add_argument("-num_samples", help='Number of samples to debug', default = 1000, required=False)
+
+args = parser.parse_args()
 
 FLAGS = flags.FLAGS
        
@@ -36,29 +52,18 @@ def m_instance( sample, sens_params, conf):
         m_sample.append(temp)
     return np.array(m_sample)
     
-def clustering(probs,m_sample, sens_params):
-    epsillon = 0.025
+def clustering(probs,m_sample, sens_params, epsilon=0.025):
     cluster_dic = {}
     cluster_dic['Seed'] = m_sample[0][0]
-         
-    for i in range(len(probs)):
-        #  to avoid k = Max + 1
-        if probs[i] == 1.0:
-            if (int( probs[i] / epsillon ) -1) not in cluster_dic.keys():
-             
-                cluster_dic[ (int( probs[i] / epsillon ) - 1)] = [ [m_sample[i][0][j - 1] for j in sens_params] ]
-           
-            else:
-                cluster_dic[ (int( probs[i] / epsillon ) - 1)].append( [m_sample[i][0][j - 1] for j in sens_params] )
+    bins= np.arange(0, 1, epsilon )
+    digitized = np.digitize(probs, bins) - 1
+    for  k in range(len(digitized)):
 
-                       
-        elif int( probs[i] / epsillon ) not in cluster_dic.keys():
-                cluster_dic[ int( probs[i] / epsillon )] = [ [m_sample[i][0][j - 1] for j in sens_params] ]
-           
+        if digitized[k] not in cluster_dic.keys():        
+            cluster_dic[digitized[k]]=[ [m_sample[k][0][j - 1] for j in sens_params]]
         else:
-                cluster_dic[ int( probs[i] / epsillon)].append( [m_sample[i][0][j - 1] for j in sens_params] )
-
-    return cluster_dic  
+            cluster_dic[digitized[k]].append( [m_sample[k][0][j - 1] for j in sens_params])
+    return cluster_dic 
 
     
 def pred_prob(sess, x, preds, m_sample, input_shape):
@@ -67,7 +72,7 @@ def pred_prob(sess, x, preds, m_sample, input_shape):
         return probs        
         
 def neuron_locator(sess, model, samples, layer_number,model_path, input_shape, 
-                   nb_classes, dataset, sens_params, update_list ):
+                   nb_classes, dataset, sens_params, update_list  ):
         
         if  sess._closed:
 #             config = tf.ConfigProto()
@@ -102,7 +107,8 @@ def neuron_locator(sess, model, samples, layer_number,model_path, input_shape,
         all_probs = sess.run(feed_dic)
         out_dic   = {}
         for key in all_probs.keys():
-            probs = np.array(all_probs[key]).reshape((9,2))[:,1:].reshape((9))
+
+            probs = np.array(all_probs[key]).reshape((np.array(all_probs[key]).shape[0],2))[:,1:].reshape((np.array(all_probs[key]).shape[0]))
             clus  = clustering(probs,samples, sens_params)
             out_dic[key] = [len(clus) - 1 ]
         sess.close()
@@ -156,7 +162,7 @@ def model_acc(sess, model,model_path,input_shape, nb_classes,
 
 def get_rate(sess, model, model_path, input_shape, nb_classes,
               dataset, lay_name, layer_output):
-        
+         
         def get_distance(vec1, vec2, size):
             return abs(vec1 - vec2).sum() / size
         
@@ -201,6 +207,7 @@ def layer_locator(sess, model, model_path,sens_params, input_shape, nb_classes,
             saver.restore(sess, model_path)
             
         layer_list = []
+        layer_rate = []
         for sample in samples:            
             samples = m_instance( np.array([sample]) , sens_params, conf)
             layer_output = layer_out(sess,model,np.array(samples).astype('float32')) 
@@ -209,33 +216,36 @@ def layer_locator(sess, model, model_path,sens_params, input_shape, nb_classes,
                 if 'ReLU' in layer:
                     temp_rate = get_rate(sess, model, model_path, input_shape, nb_classes,
                                           dataset,layer, layer_output)
-                    temp_list.append(temp_rate)             
+                    temp_list.append(temp_rate) 
+            layer_rate.append(max(temp_list[1:]))
+                              
             layer_list.append((np.argmax(np.array(temp_list[1:])) + 2 ))
         sess.close()
-        tf.reset_default_graph()    
-        return stats.mode(layer_list)[0][0]      
+        tf.reset_default_graph()
+        print()
+        return stats.mode(layer_list)[0][0], np.array(layer_rate).mean()    
 #-------------------------------------------
     
-def dnn_fair_testing(dataset, sens_params, model_path):
+def dnn_fair_testing(dataset, sens_params, model_path, acc_e, timeout, num_samples):
 
-    data = {"bank":bank_data}
-           
-    data_config = {"bank":bank}
-    
+    data = {"census":census_data, "credit":credit_data, "bank":bank_data, "compas":compas_data, 
+            "default": default_data, "heart":heart_data, "diabetes":diabetes_data, 
+            "students":students_data, "meps15":meps15_data, "meps16":meps16_data}
+    data_config = {"census":census, "credit":credit, "bank":bank, "compas":compas, "default":default,
+                  "heart":heart , "diabetes":diabetes,"students":students, "meps15":meps15, "meps16":meps16}
     # prepare the testing data and model
     X, Y, input_shape, nb_classes = data[dataset]()
     tf.set_random_seed(1234)
     layer_numbers=[]
-    for trial in range(3):
+    layer_influence = []
+    RQ3_table = []
+    for trial in range(1):
         config = tf.ConfigProto(device_count = {'GPU': 0})
         config.allow_soft_placement= True
-
-       # with tf.device('/CPU:1'):
         sess  = tf.Session(config = config)
         x     = tf.placeholder(tf.float32, shape = input_shape)
         y     = tf.placeholder(tf.float32, shape = (None, nb_classes))
         model = dnn(input_shape, nb_classes)   
-
         preds = model(x)
         saver = tf.train.Saver()
         model_path ='../models/'
@@ -243,58 +253,53 @@ def dnn_fair_testing(dataset, sens_params, model_path):
         saver.restore(sess, model_path)
         eval_params = {'batch_size': 128}
         ini_acc = round(model_eval(sess, x, y, preds, X, Y, args=eval_params),3)
-        num_trial = 11
-        num_rand_point_1 = 4 # number of random points in range(0 to mean)
-        num_rand_point_2 = 3 # number of random points in range(mean to std)
-        num_rand_point_3 = 1 # number of random points in range(mean + std to  mean + 2 * std)
-        global sample_df
+        time1 = time.time()
     # Loading the result of QID
         layer_output = layer_out(sess,model,X.astype('float32'))
-        input_df  = pd.read_csv('../results/' + dataset + '/OurTool/RQ3/total_disc_'+str(trial)+'.csv',header='infer')
+        input_df  = pd.read_csv('../results/' + str(dataset) + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_'+str(trial)+'.csv',header='infer')
         input_df = input_df.drop(columns=['Unnamed: 0'])
+        if 'time' not in input_df.columns:
+            input_df['time'] = 0
         sample_df = input_df.copy()
-        sample_df_rand = sample_df.sample(n = 900,axis = 0,random_state = np.random.RandomState())
-        sample_df_maxk = sample_df.sort_values(by = 'k',ascending=False).head(100)
-        sample_df = pd.concat([sample_df_rand,sample_df_maxk])
+        sample_df_rand = sample_df.sample(n = int(num_samples*0.8),axis = 0,random_state = np.random.RandomState())
+        sample_df_maxk = sample_df.sort_values(by = 'k',ascending=False).head(int(num_samples*0.2))
+        sample_df = pd.concat([sample_df_maxk,sample_df_rand])
         ini_k_samples = sample_df['k']
-        sample_df = sample_df.drop(columns = ['sh_entropy', 'k', 'disc', 'min_entropy']) 
+        sample_df = sample_df.drop(columns = ['sh_entropy', 'k', 'disc', 'min_entropy','time']) 
         samples   = sample_df.to_numpy()
         num_samples = len(samples)
-        print(num_samples)
-        layer_number = layer_locator(sess, model, model_path, sens_params, input_shape, nb_classes,
+        print(' Localizing biased layer')
+        layer_number, layer_rate = layer_locator(sess, model, model_path, sens_params, input_shape, nb_classes,
               dataset,data_config[dataset], samples)
+
         layer_numbers.append(layer_number)
+        layer_influence.append(layer_rate)
+        print(' Localizing biased neuron')
         #-----------------------------
-        update_df = layer_output['ReLU'+str((2*layer_number) -1 )]
+        update_df = layer_output['ReLU'+str((2*layer_number) - 1 )]
         update_min  = np.min(update_df,axis=0)
-        update_max  = np.max(update_df,axis=0)
+#         update_max  = np.max(update_df,axis=0)
         update_mean = np.mean(update_df,axis=0)
-        update_std  = np.std(update_df,axis=0)
+#         update_std  = np.std(update_df,axis=0)
         update_list = []
-        update_list.append(update_min)
-        rand_point_1 = np.sort(np.random.random(num_rand_point_1))
-        for i in range(len(rand_point_1)):
-            update_list.append(rand_point_1[i] * update_mean)
+        update_list.append(update_min)      
         update_list.append(update_mean)
-        rand_point_2 = np.sort(np.random.random(num_rand_point_2))
-        for i in range(len(rand_point_2)):
-            update_list.append(update_mean + rand_point_2[i] * update_std)
-        update_list.append(update_mean + update_std +  np.random.random(num_rand_point_3)[0] * update_std)        
-        update_list.append(update_max)
         layer_size   = model.layers[(layer_number*2) - 1].input_shape[1]
         layer_name   = model.layers[(layer_number*2) - 1]
         num_layers   = len(model.layers)
-
+        num_trial = len(update_list)
         all_dic = {}
         accu_neuron = {}
         acc_try = {}
         sample_ind = 0
-        for sample in samples:       
+        for sample in samples:
+            if time.time() - time1 > timeout:
+                break
             update_list_man = np.array([0] * layer_size)
             m_samples  = m_instance( np.array([sample]), sens_params, data_config[dataset])
             change_dic = {}
             for i in range(num_trial):
-                update_list_man = update_list[i]               
+                update_list_man = update_list[i]
                 x = neuron_locator(sess, model, m_samples, layer_number,model_path,
                                input_shape, nb_classes, dataset, sens_params, update_list_man )
                 if sample_ind == 0:
@@ -306,36 +311,26 @@ def dnn_fair_testing(dataset, sens_params, model_path):
                     acc_try[i] = accu_neuron                 
                 change_dic[i] = x  
             all_dic[sample_ind] = change_dic
-            clear_output(wait=True)
+            clear_output(wait=False)
             sample_ind += 1
 
         # create the folder for storing the fairness testing result
         if not os.path.exists('../results/'):
             os.makedirs('../results/')
-        if not os.path.exists('../results/' + dataset + '/'):
-            os.makedirs('../results/' + dataset + '/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/'):
-            os.makedirs('../results/' + dataset + '/OurTool/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ3/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ3/')          
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ3/table2/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ3/table2/')
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/inik_'+str(num_samples)+'_'+str(trial)+'.npy',
-                np.array(ini_k_samples))
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/accu_dic_'+str(num_samples)+'_'+str(trial)+'.npy',
-                acc_try) 
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/all_dic_'+str(num_samples)+'_'+str(trial)+'.npy', 
-                all_dic)   
+        if not os.path.exists('../results/' + str(dataset) + '/'):
+            os.makedirs('../results/' + str(dataset) + '/')
+        if not os.path.exists('../results/' + str(dataset) + '/DICE/'):
+            os.makedirs('../results/' + str(dataset) + '/DICE/')
+        if not os.path.exists('../results/' + str(dataset) + '/DICE/RQ3/'):
+            os.makedirs('../results/' + str(dataset) + '/DICE/RQ3/')   
 
-        accu_dic = dict(np.load('../results/'+dataset+'/OurTool/RQ3/table2/accu_dic_'+str(num_samples)+'_'+str(trial)+'.npy',
-                                allow_pickle=True).item())  
-        all_dic  = dict(np.load('../results/'+dataset+'/OurTool/RQ3/table2/all_dic_'+str(num_samples)+'_'+str(trial)+'.npy',
-                               allow_pickle=True).item())
-        ini_k = np.load('../results/'+dataset+'/OurTool/RQ3/table2/inik_'+str(num_samples)+'_'+str(trial)+'.npy')
-
+        accu_dic =  acc_try 
+        ini_k = np.array(ini_k_samples[:sample_ind])
+        print('Tested samples ', sample_ind)
         num_samples = len(all_dic.keys())
         num_force   = len(all_dic[0].keys())
         num_neuron  = len(all_dic[0][0].keys())
+        print('Biased layer',layer_number)
         ini_k = np.repeat(ini_k, (num_force * num_neuron))
         data  = np.zeros(((num_samples * num_force * num_neuron) ,4) , dtype = 'int32')
         df    = pd.DataFrame(data,columns = ['sample','force','neuron','K'],dtype = 'int32')
@@ -359,11 +354,11 @@ def dnn_fair_testing(dataset, sens_params, model_path):
         R_act   = []
         R_deact = []
         diff_R  = []
-        acc_e   = 0.05
+        #acc_e   = acc_epsilon
         for neuron in range(num_neuron):
-            k_deact = df.loc[(df['neuron'] == neuron) & (df['force'] <= 1) & \
+            k_deact = df.loc[(df['neuron'] == neuron) & (df['force'] == 0) & \
                                   (df['acc'] >= ini_acc - acc_e)]['K'].mean()
-            k_act   = df.loc[(df['neuron'] == neuron) & (df['force'] > 1) & \
+            k_act   = df.loc[(df['neuron'] == neuron) & (df['force'] == 1) & \
                                   (df['acc'] >= ini_acc - acc_e)]['K'].mean()
             k_init  = df.loc[(df['neuron'] == neuron) & (df['acc'] >= ini_acc - acc_e)]['init_k'].mean()
             R_act_temp   = (k_act - k_init) / k_init
@@ -373,22 +368,95 @@ def dnn_fair_testing(dataset, sens_params, model_path):
             R_deact.append(R_deact_temp)
             diff_R.append(diff_R_temp)
 
+        RQ3_table.append(diff_R)
+  
+    RQ3_table = np.mean(RQ3_table,axis=0)
+    pos_eff_ind = np.where(RQ3_table<0)[0]
+    neg_eff_ind = np.where(RQ3_table>0)[0]
+    neg_neurons = neg_eff_ind[np.argsort(RQ3_table[neg_eff_ind])]
+    pos_neurons = pos_eff_ind[np.argsort(RQ3_table[pos_eff_ind])]
+    
+    if len(neg_neurons) > 0:
+        N_neg_1 = neg_neurons[-1]
+        ACD_neg_1 = RQ3_table[N_neg_1]
+    else:
+        N_neg_1 = 'N/A'
+        ACD_neg_1 = 'N/A'
+    if len(neg_neurons) > 1:
+        N_neg_2 = neg_neurons[-2]
+        ACD_neg_2 = RQ3_table[N_neg_2]
+    else:
+        N_neg_2 = 'N/A'
+        ACD_neg_2 = 'N/A'
+    if len(neg_neurons) > 2:
+        N_neg_3 = neg_neurons[-3]
+        ACD_neg_3 = RQ3_table[N_neg_3]
+    else:
+        N_neg_3 = 'N/A'
+        ACD_neg_3 = 'N/A'
 
-        df.to_csv('../results/'+dataset+'/OurTool/RQ3/table2/df_'+str(num_samples)+'_'+str(trial)+'.csv',index=False)
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/R_act_'+str(num_samples)+'_'+str(trial)+'.npy',R_act)
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/R_deact_'+str(num_samples)+'_'+str(trial)+'.npy',R_deact)
-        np.save('../results/'+dataset+'/OurTool/RQ3/table2/R_diffR_'+str(num_samples)+'_'+str(trial)+'.npy',diff_R)
-    np.save('../results/'+dataset+'/OurTool/RQ3/table2/res_layers_'+str(num_samples)+'_'+str(trial)+'.npy',layer_numbers)
+    if len(pos_neurons) > 0:
+        N_pos_1 = pos_neurons[0]
+        ACD_pos_1 = RQ3_table[N_pos_1]
+    else:
+        N_pos_1 = 'N/A'
+        ACD_pos_1 = 'N/A'
+
+    if len(pos_neurons) > 1:
+        N_pos_2 = pos_neurons[1]
+        ACD_pos_2 = RQ3_table[N_pos_2]
+    else:
+        N_pos_2 = 'N/A'
+        ACD_pos_2 = 'N/A'
+    if len(pos_neurons) > 2:
+        N_pos_3 = pos_neurons[2]
+        ACD_pos_3 = RQ3_table[N_pos_3]
+    else:
+        N_pos_3 = 'N/A'
+        ACD_pos_3 = 'N/A'
+
+
+    with open('../results/'+str(dataset)+'/DICE/RQ3_table_1_'+str(num_samples)+'.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Biased layer'] + [' Layer influence'] + ['Neuron+1','ACD+1', 'Neuron+2','ACD+2',
+                                                                   'Neuron+3', 'ACD+3','Neuron-1', 'ACD-1',
+                                                                   'Neuron-2','ACD-2','Neuron-3','ACD-3'])
+
+        writer.writerow(([stats.mode(layer_numbers)[0][0],np.mean(layer_influence),N_pos_1,ACD_pos_1,
+              N_pos_2,ACD_pos_2, N_pos_3,ACD_pos_3, N_neg_1,ACD_neg_1,N_neg_2,ACD_neg_2,
+              N_neg_3,ACD_neg_3]))
+
+    shutil.move('../results/'+str(dataset)+'/DICE/RQ3_table_1_'+str(num_samples)+'.csv', '../results/'+str(dataset)+'/DICE/RQ3/RQ3_table_1_'+str(num_samples)+'.csv')
+    A          = ini_acc 
+    K_ini      = df.groupby('sample').mean()['init_k'].mean()
+    A_deactive = df.loc[(df['neuron']==N_neg_1) & (df['force']==0)]['acc'].mean()
+    K_deactive = df.loc[(df['neuron']==N_neg_1) & (df['force']==0)]['K'].mean()
+    A_active   = df.loc[(df['neuron']==N_pos_1) & (df['force']==1)]['acc'].mean()
+    K_active   = df.loc[(df['neuron']==N_pos_1) & (df['force']==1)]['K'].mean()
+    
+    with open('../results/'+str(dataset)+'/DICE/RQ3/RQ3_table_2_'+str(num_samples)+'.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['A', 'K', 'A=0', 'K=0', 'A>0', 'K>0' ,'time to debug'])
+        writer.writerow([ A, K_ini, A_deactive, K_deactive, A_active, K_active , round(time.time() - time1,1)])
+    print('Time to intervene', time.time() - time1 )
 def main(argv = None):
     
     dnn_fair_testing(dataset = FLAGS.dataset, 
                      sens_params = FLAGS.sens_params,
-                     model_path  = FLAGS.model_path)
-    print(time.time() - time1 )
+                     model_path  = FLAGS.model_path,
+                     acc_e = FLAGS.acc_epsilon, 
+                     timeout = FLAGS.timeout,
+                     num_samples = FLAGS.num_samples
+                    )
+
 
 if __name__ == '__main__':
-    flags.DEFINE_string("dataset", "bank", "the name of dataset")
+    sens_list = [int(i) for i in re.findall('[0-9]+', args.sensitive_index)]
+    flags.DEFINE_string("dataset", args.dataset, "the name of dataset")
     flags.DEFINE_string('model_path', '../models/', 'the path for testing model')
-    flags.DEFINE_list('sens_params',[1],'sensitive parameters index.1 for age, 9 for gender, 8 for race')
+    flags.DEFINE_list('sens_params',sens_list,'sensitive parameters index.1 for age, 9 for gender, 8 for race')
+    flags.DEFINE_float('acc_epsilon',0.05,'Tolerance epsilon')
+    flags.DEFINE_integer('timeout', args.timeout, 'search timeout')
+    flags.DEFINE_integer('num_samples', args.num_samples, 'Number of samples for debugging')
     tf.app.run()
 

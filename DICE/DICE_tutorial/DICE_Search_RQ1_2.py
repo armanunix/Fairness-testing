@@ -28,14 +28,16 @@ from DICE_model.tutorial_models import dnn
 from DICE_utils.utils_tf import model_prediction, model_argmax , layer_out
 from DICE_utils.config import census, credit, bank, compas, default, heart, diabetes, students , meps15, meps16
 from DICE_tutorial.utils import cluster, gradient_graph
+import argparse
+import re
 
-# import argparse
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--dataset", help='The name of dataset: census, credit, bank, default, meps21 ')
-# parser.add_argument("--sensitive_index", help='The index for sensitive feature')
-# parser.add_argument("--time_out", help='Max. running time', default = 14400, required=False)
+parser = argparse.ArgumentParser()
+parser.add_argument("-dataset", help='The name of dataset: census, credit, bank, default, meps21 ', required=True)
+parser.add_argument("-sensitive_index", help='The index for sensitive features', required=True)
+parser.add_argument("-timeout", help='Max. running time', default = 3600, required=False)
+parser.add_argument("-RQ", help='1 for RQ, 2 for RQ2', default = 1, required=False)
+args = parser.parse_args()
 
-# args = parser.parse_args()
 FLAGS = flags.FLAGS
 
 # step size of perturbation
@@ -248,7 +250,7 @@ def sh_entropy(probs,bin_thresh, base=2 ):
      
     
 def dnn_fair_testing(dataset, sens_params, model_path, cluster_num, 
-                     max_global, max_local, max_iter, epsillon, timeout):
+                     max_global, max_local, max_iter, epsillon, timeout, RQ):
     """
     
     The implementation of ADF
@@ -299,7 +301,7 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
     print(dataset, sens_params)
     RQ2_table = []
     RQ1_table = []
-    for trial in range(2):
+    for trial in range(1):
         print('Trial', trial)
         if  sess._closed:
             sess = tf.Session(config=config)
@@ -371,12 +373,10 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
                 m_sample = m_instance( np.array(sample) , sens_params, data_config[dataset] )
                 pred = pred_prob( sess, x, preds, m_sample , input_shape )
                 clus_dic = clustering( pred, m_sample, sens_params, epsillon )
-                #entropy_min = round(np.log2(len(clus_dic)-1 ),2)#sh_entropy(pred, ent_tresh)
-                #entropy_sh = sh_entropy(pred, epsillon)
+
                 if iter == 0:
                     init_k = len(clus_dic) - 1
                     max_k = init_k
-                    #max_k_time = round((time.time() - start_time),4)
 
                 if len(clus_dic) - 1 > max_k:
                     max_k = len(clus_dic) - 1
@@ -437,18 +437,8 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
                     g_diff = np.array(s_grad[0] == n_grad[0], dtype = float)                
                 for sens in sens_params:
                     g_diff[sens - 1] = 0 
-#                         g_diff1[sens - 1] = 0
-
 
                 cal_grad = s_grad * g_diff
-#                     cal_grad1 = np.array([grad_m_sign[np.random.randint(len(grad_m_sign))] * g_diff1])
-#                     if np.zeros(input_shape[1]).tolist() == cal_grad1.tolist()[0]:
-#                         index = np.random.randint(len(cal_grad1[0]) - 1)
-#                         for i in range(len(sens_params) - 1, -1, -1):
-#                             if index == sens_params[i] - 1 :
-#                                 index = index + 1
-#                         cal_grad1[0][index]  = np.random.choice([1.0, -1.0])
-
                 if np.zeros(input_shape[1]).tolist() == cal_grad.tolist()[0]:
                     index = np.random.randint(len(cal_grad[0]) - 1)
                     for i in range(len(sens_params) - 1, -1, -1):
@@ -465,207 +455,271 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
                 init_k_list.append(init_k)
                 max_k_list.append(max_k)
             
-        print('Search Time =', time.time()-time1)
-
-        # create the folder for storing the fairness testing result
-        if not os.path.exists('../results/'):
-            os.makedirs('../results/')
-        if not os.path.exists('../results/' + dataset + '/'):
-            os.makedirs('../results/' + dataset + '/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/'):
-            os.makedirs('../results/' + dataset + '/OurTool/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ1&2/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ1&2/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ1&2/' + ''.join(str(i) for i in sens_params)+'_10runs/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ1&2/' + ''.join(str(i) for i in sens_params)+'_10runs/')
-        # storing the fairness testing result
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_'+str(trial)+'.npy', 
-                np.array(global_inputs_list))
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_'+str(trial)+'.npy', 
-                np.array(local_inputs_list))
-        total_inputs = np.concatenate((local_inputs_list,global_inputs_list), axis=0)
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy',
-                total_inputs)
-        # RQ1 & RQ2
-
-        local_sam = np.array(local_inputs_list).astype('int32')
-        global_sam = np.array(global_inputs_list).astype('int32')
-        # Storing result for RQ1 table
-        print('Analyzing the search results....')
-        
-        with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
-            writer = csv.writer(f)
-            for ind in range(len(global_inputs_list)):
-                m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
-                rows = m_sample.reshape((len(m_sample),input_shape[1]))
-                writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
-
-        with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
-            writer = csv.writer(f)
-            for ind in range(len(local_inputs_list)):
-                m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
-                rows = m_sample.reshape((len(m_sample),input_shape[1]))
-                writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
-        
-        df_l = pd.read_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
-        df_g = pd.read_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
-
-        df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
-        df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
-        g_pivot = pd.pivot_table(df_g, values="label", index=list(np.setxor1d(df_g.columns[:-1] ,
-                                                                              np.array(sens_params)-1)), aggfunc=np.sum)
-        l_pivot = pd.pivot_table(df_l, values="label", index=list(np.setxor1d(df_l.columns[:-1] ,
-                                                                           np.array(sens_params)-1)), aggfunc=np.sum)
-
-        g_time = g_pivot.index[np.where((g_pivot['label'] > 0) & (g_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
-        l_time = l_pivot.index[np.where((l_pivot['label'] > 0) & (l_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
-        tot_time = np.sort(np.concatenate((l_time, g_time), axis=0 ))
-        print('Time to 1st ID',tot_time[0])   
-        print('time to 1000 ID',tot_time[999])
-        
-        g_dis = (len(m_sample) - g_pivot.loc[(g_pivot['label'] > 0) & \
-                                             (g_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
-        l_dis = (len(m_sample) - l_pivot.loc[(l_pivot['label'] > 0) & \
-                                             (l_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
-
-        g_dis_adf = len(g_time)
-        l_dis_adf = len(l_time)
-
-
-        global_succ_adf = round((g_dis_adf / len(global_sam)) * 100, 1)
-        local_succ_adf  = round((l_dis_adf / len(local_sam)) * 100, 1)
-
-        tot_df = pd.DataFrame(total_inputs)
-        tot_df.columns=[i for i in range(input_shape[1])] + ['time']
-        
-        #tot_df = tot_df[[i for i in range(input_shape[1])] + [tot_df.columns[-2]]]
-        #columns = list(tot_df.columns)
-        #columns[-1] = 'sh_entropy'
-        #tot_df.columns = columns
-        k = []
-        disc = []
-        tot_df['sh_entropy'] = 0
-        for sam_ind in range(total_inputs.shape[0]): 
+        print('Search Done!')
+        if RQ == 1:
             
-            m_sample = m_instance( np.array([total_inputs[:,:input_shape[1]][sam_ind]]) , sens_params, data_config[dataset] )
-            pred = pred_prob( sess, x, preds, m_sample , input_shape )
-            clus_dic = clustering( pred, m_sample, sens_params, epsillon )
-            tot_df.loc[[sam_ind], 'sh_entropy'] = sh_entropy(pred, epsillon)
-            if pred.max() > 0.5 and  pred.min()< 0.5:
-                disc.append(1)
+            # create the folder for storing the fairness testing result
+            if not os.path.exists('../results/'):
+                os.makedirs('../results/')
+            if not os.path.exists('../results/' + dataset + '/'):
+                os.makedirs('../results/' + dataset + '/')
+            if not os.path.exists('../results/' + dataset + '/DICE/'):
+                os.makedirs('../results/' + dataset + '/DICE/')
+            if not os.path.exists('../results/' + dataset + '/DICE/RQ1/'):
+                os.makedirs('../results/' + dataset + '/DICE/RQ1/')
+            if not os.path.exists('../results/' + dataset + '/DICE/RQ1/' + ''.join(str(i) for i in sens_params)+'_10runs/'):
+                os.makedirs('../results/' + dataset + '/DICE/RQ1/' + ''.join(str(i) for i in sens_params)+'_10runs/')
+            # storing the fairness testing result
+            np.save('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_'+str(trial)+'.npy', 
+                    np.array(global_inputs_list))
+            np.save('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_'+str(trial)+'.npy', 
+                    np.array(local_inputs_list))
+            total_inputs = np.concatenate((local_inputs_list,global_inputs_list), axis=0)
+            np.save('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy',
+                    total_inputs)
+            # RQ1 & RQ2
+
+            local_sam = np.array(local_inputs_list).astype('int32')
+            global_sam = np.array(global_inputs_list).astype('int32')
+            # Storing result for RQ1 table
+            print('Analyzing the search results....')
+
+            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+                writer = csv.writer(f)
+                for ind in range(len(global_inputs_list)):
+                    m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
+                    rows = m_sample.reshape((len(m_sample),input_shape[1]))
+                    writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
+
+            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+                writer = csv.writer(f)
+                for ind in range(len(local_inputs_list)):
+                    m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
+                    rows = m_sample.reshape((len(m_sample),input_shape[1]))
+                    writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
+
+            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
+            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+
+            df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
+            df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
+            g_pivot = pd.pivot_table(df_g, values="label", index=list(np.setxor1d(df_g.columns[:-1] ,
+                                                                                  np.array(sens_params)-1)), aggfunc=np.sum)
+            l_pivot = pd.pivot_table(df_l, values="label", index=list(np.setxor1d(df_l.columns[:-1] ,
+                                                                               np.array(sens_params)-1)), aggfunc=np.sum)
+
+            g_time = g_pivot.index[np.where((g_pivot['label'] > 0) & (g_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
+            l_time = l_pivot.index[np.where((l_pivot['label'] > 0) & (l_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
+            tot_time = np.sort(np.concatenate((l_time, g_time), axis=0 ))
+
+            g_dis = (len(m_sample) - g_pivot.loc[(g_pivot['label'] > 0) & \
+                                                 (g_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
+            l_dis = (len(m_sample) - l_pivot.loc[(l_pivot['label'] > 0) & \
+                                                 (l_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
+
+
+            tot_df = pd.DataFrame(total_inputs)
+            tot_df.columns=[i for i in range(input_shape[1])] + ['time']
+
+            k = []
+            disc = []
+            tot_df['sh_entropy'] = 0
+            for sam_ind in range(total_inputs.shape[0]): 
+
+                m_sample = m_instance( np.array([total_inputs[:,:input_shape[1]][sam_ind]]) , sens_params, data_config[dataset] )
+                pred = pred_prob( sess, x, preds, m_sample , input_shape )
+                clus_dic = clustering( pred, m_sample, sens_params, epsillon )
+                tot_df.loc[[sam_ind], 'sh_entropy'] = sh_entropy(pred, epsillon)
+                if pred.max() > 0.5 and  pred.min()< 0.5:
+                    disc.append(1)
+                else:
+                    disc.append(0)
+                k.append(len(clus_dic) - 1)
+
+            tot_df['k'] = k
+            tot_df['disc'] = disc
+            tot_df['min_entropy'] = round(np.log2(tot_df['k'] ),2)
+            tot_dis = tot_df.loc[tot_df['disc'] == 1]
+            tot_dis.to_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_' + str(trial)+'.csv')
+            # reseting the TF graph for the next round
+            sess.close()
+            tf.reset_default_graph()
+            haighest_k = np.sort(tot_df['k'].unique())[-3:]
+            if len(haighest_k)>2:
+                IK1F = np.where(tot_df['k']==haighest_k[2])[0].shape[0]
+                IK2F = np.where(tot_df['k']==haighest_k[1])[0].shape[0]
+                IK3F = np.where(tot_df['k']==haighest_k[0])[0].shape[0]
+
             else:
-                disc.append(0)
-            k.append(len(clus_dic) - 1)
+                IK1F = np.where(tot_df['k']==haighest_k[1])[0].shape[0]
+                IK2F = np.where(tot_df['k']==haighest_k[0])[0].shape[0]
+                IK3F = 0
+            print('Global ID RQ1 =', g_dis)
+            print('local  ID RQ1  =',  l_dis)
+            print('Total loc samples  = ', len(local_sam)) 
+            print('Total glob samples = ', len(global_sam)) 
+            print('Total ID = ',g_dis + l_dis)
+
+            global_succ = round( g_dis / (len(global_sam) * \
+                                 len(m_sample)) * 100,1)
+            local_succ = round(l_dis  / (len(local_sam) * \
+                                 len(m_sample)) * 100,1)
+
+
+            row = [len(total_inputs)] + [np.mean(init_k_list), np.mean(max_k_list),np.mean(max_k_time_list)] + list(tot_dis[['min_entropy', 'sh_entropy']].mean())  + [IK1F, IK2F,IK3F] 
+            RQ1_table.append(row)
             
-        tot_df['k'] = k
-        time_K_greater_than_1 = tot_df['time'][np.where(tot_df['k']>1)[0][0]]
-        tot_df['disc'] = disc
-        tot_df['min_entropy'] = round(np.log2(tot_df['k'] ),2)
-        tot_dis = tot_df.loc[tot_df['disc'] == 1]
-#         min_entropy.append( np.mean(tot_dis['min_entropy']))
-#         k_mean.append(np.mean(tot_dis['k']))
-#         sh_entropy_mean.append(np.mean(tot_dis['sh_entropy']))
-        tot_dis.to_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_' + str(trial)+'.csv')
-        # reseting the TF graph for the next round
-        sess.close()
-        tf.reset_default_graph()
-        haighest_k = np.sort(tot_df['k'].unique())[-3:]
-        if len(haighest_k)>2:
-            IK1F = np.where(tot_df['k']==haighest_k[2])[0].shape[0]
-            IK2F = np.where(tot_df['k']==haighest_k[1])[0].shape[0]
-            IK3F = np.where(tot_df['k']==haighest_k[0])[0].shape[0]
 
-        else:
-            IK1F = np.where(tot_df['k']==haighest_k[1])[0].shape[0]
-            IK2F = np.where(tot_df['k']==haighest_k[0])[0].shape[0]
-            IK3F = 0
-
+        if RQ == 2:
             
-        print('Global ID RQ1 =', g_dis)
-        print('local  ID RQ1  =',  l_dis)
-        print('Total loc samples  = ', len(local_sam)) 
-        print('Total glob samples = ', len(global_sam)) 
-        print('Total ID = ',g_dis + l_dis)
-        print('Total ID RQ2  = ',g_dis_adf + l_dis_adf)
-        print('Global ID RQ2  = ',g_dis_adf)
-        print('Local  ID RQ2  = ',l_dis_adf)
+            # create the folder for storing the fairness testing result
+            if not os.path.exists('../results/'):
+                os.makedirs('../results/')
+            if not os.path.exists('../results/' + dataset + '/'):
+                os.makedirs('../results/' + dataset + '/')
+            if not os.path.exists('../results/' + dataset + '/DICE/'):
+                os.makedirs('../results/' + dataset + '/DICE/')
+            if not os.path.exists('../results/' + dataset + '/DICE/RQ2/'):
+                os.makedirs('../results/' + dataset + '/DICE/RQ2/')
+            if not os.path.exists('../results/' + dataset + '/DICE/RQ2/' + ''.join(str(i) for i in sens_params)+'_10runs/'):
+                os.makedirs('../results/' + dataset + '/DICE/RQ2/' + ''.join(str(i) for i in sens_params)+'_10runs/')
+            # storing the fairness testing result
+            np.save('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_'+str(trial)+'.npy', 
+                    np.array(global_inputs_list))
+            np.save('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_'+str(trial)+'.npy', 
+                    np.array(local_inputs_list))
+            total_inputs = np.concatenate((local_inputs_list,global_inputs_list), axis=0)
+            np.save('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy',
+                    total_inputs)
+            # RQ1 & RQ2
 
-        global_succ = round( g_dis / (len(global_sam) * \
-                             len(m_sample)) * 100,1)
-        local_succ = round(l_dis  / (len(local_sam) * \
-                             len(m_sample)) * 100,1)
+            local_sam = np.array(local_inputs_list).astype('int32')
+            global_sam = np.array(global_inputs_list).astype('int32')
+            # Storing result for RQ1 table
+            print('Analyzing the search results....')
+
+            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+                writer = csv.writer(f)
+                for ind in range(len(global_inputs_list)):
+                    m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
+                    rows = m_sample.reshape((len(m_sample),input_shape[1]))
+                    writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
+
+            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+                writer = csv.writer(f)
+                for ind in range(len(local_inputs_list)):
+                    m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
+                    rows = m_sample.reshape((len(m_sample),input_shape[1]))
+                    writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
+
+            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
+            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+
+            df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
+            df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
+            g_pivot = pd.pivot_table(df_g, values="label", index=list(np.setxor1d(df_g.columns[:-1] ,
+                                                                                  np.array(sens_params)-1)), aggfunc=np.sum)
+            l_pivot = pd.pivot_table(df_l, values="label", index=list(np.setxor1d(df_l.columns[:-1] ,
+                                                                               np.array(sens_params)-1)), aggfunc=np.sum)
+
+            g_time = g_pivot.index[np.where((g_pivot['label'] > 0) & (g_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
+            l_time = l_pivot.index[np.where((l_pivot['label'] > 0) & (l_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
+            tot_time = np.sort(np.concatenate((l_time, g_time), axis=0 ))
+            print('Time to 1st ID',tot_time[0])   
+            print('time to 1000 ID',tot_time[999])
 
 
-#         df_RQ1 = pd.DataFrame(total_inputs)
-#         df_RQ1.columns = [i for i in range(input_shape[1])] + ['init_k', 'max_k', 'max_k_time', 'sample_time']
-        #row = [len(total_inputs)] + list(df_RQ1[['init_k', 'max_k', 'max_k_time',]].mean()+[time_K_greater_than_1])
-        row = [len(total_inputs)] + [np.mean(init_k_list), np.mean(max_k_list),np.mean(max_k_time_list)] + list(tot_dis[['min_entropy', 'sh_entropy']].mean()) + [time_K_greater_than_1] + [IK1F, IK2F,IK3F] 
-        RQ1_table.append(row)
-        RQ2_table.append([g_dis_adf, l_dis_adf, g_dis_adf + l_dis_adf ,local_succ_adf, tot_time[0], tot_time[999] ])
-        print('Local search success rate  = ', local_succ, '%')
-        print('Global search success rate = ', global_succ, '%')
-        print('Local search ADF success rate  = ', local_succ_adf, '%')
-        print('Global search ADF success rate = ', global_succ_adf, '%')
-        
-    np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ2_10runs.npy',
-            RQ2_table)
-    np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ1_10runs.npy',
-            RQ1_table)
-    with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ2_table.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['g_adf_disc', 'l_adf_disc','tot_adf_disc','local_succ_adf',
-                             'time_to_first','time_to_1000'])
-            writer.writerow(np.mean(RQ2_table,axis=0))
-            writer.writerow(np.std(RQ2_table,axis=0))
+            g_dis_adf = len(g_time)
+            l_dis_adf = len(l_time)
 
-    with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ1_table.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['tot_samples','init_k', 'max_k', 'max_k_time','min_entropy',
-                             'sh_entropy','time_K_greater_than_1', 'IK1F', 'IK2F', 'IK3F'])
-            writer.writerow(np.mean(RQ1_table,axis=0))
-            writer.writerow(np.std(RQ1_table,axis=0))
 
-#     with open('../results/' + dataset + '/OurTool/RQ3/entropy.csv','w') as f:
-#         writer = csv.writer(f)
-#         writer.writerow(['k_mean','min_entropy','sh_entropy'])
-#         writer.writerow([np.mean(k_mean),np.mean(min_entropy), np.mean(sh_entropy_mean) ])
-def main(argv=None):
-    for data_set in ["credit", "bank",  "default", "diabetes"]:#"heart" ,"students", "meps15", "meps16"]:
-        if data_set == 'credit': sens_p = [9]
-        elif data_set == 'census': sens_p = [9,8,1]
-        elif data_set == 'bank': sens_p = [1]
-        elif data_set == 'compas': sens_p = [3,2,1]
-        elif data_set == 'default': sens_p = [5,2]
-        elif data_set == 'heart': sens_p = [2,1]
-        elif data_set == 'diabetes': sens_p = [8]
-        elif data_set == 'students': sens_p = [3,2]
-        elif data_set == 'meps15': sens_p = [10,2,1]
-        elif data_set == 'meps16': sens_p = [10,2,1]
+            global_succ_adf = round((g_dis_adf / len(global_sam)) * 100, 1)
+            local_succ_adf  = round((l_dis_adf / len(local_sam)) * 100, 1)
+
+            tot_df = pd.DataFrame(total_inputs)
+            tot_df.columns=[i for i in range(input_shape[1])] + ['time']
+            disc = []
+            for sam_ind in range(total_inputs.shape[0]): 
+
+                m_sample = m_instance( np.array([total_inputs[:,:input_shape[1]][sam_ind]]) , sens_params, data_config[dataset] )
+                pred = pred_prob( sess, x, preds, m_sample , input_shape )
+                clus_dic = clustering( pred, m_sample, sens_params, epsillon )
+                if pred.max() > 0.5 and  pred.min()< 0.5:
+                    disc.append(1)
+                else:
+                    disc.append(0)
+
+
+            tot_df['disc'] = disc
+            tot_dis = tot_df.loc[tot_df['disc'] == 1]
+            tot_dis.to_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_' + str(trial)+'.csv')
+            # reseting the TF graph for the next round
+            sess.close()
+            tf.reset_default_graph()
+            print('Total ID RQ2  = ',g_dis_adf + l_dis_adf)
+            print('Global ID RQ2  = ',g_dis_adf)
+            print('Local  ID RQ2  = ',l_dis_adf)
+
+
+
+            RQ2_table.append([g_dis_adf + l_dis_adf ,local_succ_adf, tot_time[0], tot_time[999] ])
+
+            print('Local search success rate  = ', local_succ_adf, '%')
+            print('Global search success rate = ', global_succ_adf, '%')
+
     
-        for sens in sens_p:
+    if RQ==1 :
+        np.save('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ1_10runs.npy',
+                RQ1_table)
 
-            dnn_fair_testing(dataset = data_set, 
-                             sens_params = [sens],
-                             model_path  = FLAGS.model_path,
-                             cluster_num = FLAGS.cluster_num,
-                             max_global  = FLAGS.max_global,
-                             max_local   = FLAGS.max_local,
-                             max_iter    = FLAGS.max_iter,
-                             epsillon    = FLAGS.epsillon,
-                             timeout    = FLAGS.timeout
-                            )
+        with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ1_table.csv', 'w') as f:
+                writer = csv.writer(f)
+                writer.writerow(['#I','K_I', 'K_F', 'T_KF','Q_inf',
+                             'Q_1', 'IK1F', 'IK2F', 'IK3F'])
+                writer.writerow(np.mean(RQ1_table,axis=0))
+                writer.writerow(np.std(RQ1_table,axis=0))
+    
+    elif RQ==2:
+        
+        np.save('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ2_10runs.npy',
+                RQ2_table)
 
-if __name__ == '__main__':
-    flags.DEFINE_string("dataset", "census", "the name of dataset")
+        with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ2_table.csv', 'w') as f:
+                writer = csv.writer(f)
+                writer.writerow(['tot_adf_disc','local_succ_adf',
+                                 'time_to_first','time_to_1000'])
+                writer.writerow(np.mean(RQ2_table,axis=0))
+                writer.writerow(np.std(RQ2_table,axis=0))
+
+                
+def main(argv=None):
+    dnn_fair_testing(dataset = FLAGS.dataset, 
+                     sens_params = FLAGS.sens_params,
+                     model_path  = FLAGS.model_path,
+                     cluster_num = FLAGS.cluster_num,
+                     max_global  = FLAGS.max_global,
+                     max_local   = FLAGS.max_local,
+                     max_iter    = FLAGS.max_iter,
+                     epsillon    = FLAGS.epsillon,
+                     timeout    = FLAGS.timeout,
+                     RQ = FLAGS.RQ
+                    )
+    
+
+if __name__ == '__main__':    
+    sens_list = [int(i) for i in re.findall('[0-9]+', args.sensitive_index)]
+    flags.DEFINE_string("dataset",args.dataset, "the name of dataset")
     flags.DEFINE_string('model_path', '../models/', 'the path for testing model')
     flags.DEFINE_integer('cluster_num', 4, 'the number of clusters to form as well as the number of centroids to generate')
     flags.DEFINE_integer('max_global', 1000, 'maximum number of samples for global search')
     flags.DEFINE_integer('max_local', 1000, 'maximum number of samples for local search')
     flags.DEFINE_integer('max_iter', 10, 'maximum iteration of global perturbation')
-    flags.DEFINE_integer('timeout', 60, 'search timeout')
+    flags.DEFINE_integer('timeout', args.timeout, 'search timeout')
+    flags.DEFINE_integer('RQ', args.RQ, 'RQ')
+    
     #if result for RQ1 table: set this to [9,8,1], if result for RQ2 table: set this one sensitive attribute each time 
     # e.g. for census dataset, set [9], [8], [1] for sex, race and age respectively
-    flags.DEFINE_list('sens_params', [9,8,1], 'sensitive parameters index.1 for age, 9 for gender, 8 for race')
+    flags.DEFINE_list('sens_params', sens_list, 'sensitive parameters index.1 for age, 9 for gender, 8 for race')
     flags.DEFINE_float('epsillon', 0.025, 'the value of epsillon for partitioning')
     tf.app.run()
 

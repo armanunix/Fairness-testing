@@ -1,4 +1,4 @@
-# The Implementation of DAIKE 
+# The Implementation of DICE
 ### An information-theoritic tool to testing and debugging fairness defects in deep Neural Network
 
 Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
@@ -8,8 +8,8 @@ in the internal of deep neural network.
 
 To run the search algorithm over Census dataset:
 ```
-cd DAIKE/DAIKE_tutorial
-python daike_census.py
+cd DICE/DICE_tutorial
+python DICE_census.py
 ```
 The other models for a different dataset can be run in the same fashion.
 
@@ -25,11 +25,11 @@ python RQ3_census.py
 
 The baseline tools can be found inside DAIKE baseline:
 ```
-cd DAIKE/DAIKE_baseline
+cd DICEDICE_baseline
 ```
 
 The data of analysis can be found in:
 ```
-cd DAIKE/results
+cd DICE/results
 ```
 There is one folder for each experiments that include DAIKE and the state-of-the-art outcomes.

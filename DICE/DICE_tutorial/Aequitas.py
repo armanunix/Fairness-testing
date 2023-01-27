@@ -177,13 +177,13 @@ def aequitas(dataset, sensitive_param, model_path, max_global, max_local, step_s
     data_config = {"census":census, "credit":credit, "bank":bank, "compas":compas, "default":default,
                   "heart":heart , "diabetes":diabetes,"students":students, "meps15":meps15, "meps16":meps16}
    
-    for data_set in data.keys():
+    for data_set in ['default']:
         dataset = data_set
         if dataset   == 'census': sens_p = [9,8,1]
         elif dataset == 'credit': sens_p = [13,9]
         elif dataset == 'bank': sens_p = [1]
         elif dataset == 'compas': sens_p = [3,2,1] 
-        elif dataset == 'default': sens_p = [5,2]
+        elif dataset == 'default': sens_p = [2]
         elif dataset == 'heart': sens_p = [2,1]
         elif dataset == 'diabetes': sens_p = [8]
         elif dataset == 'students': sens_p = [3,2]

@@ -29,11 +29,11 @@ from DICE_utils.utils_tf import model_prediction, model_argmax , layer_out
 from DICE_utils.config import census, credit, bank, compas, default, heart, diabetes, students , meps15, meps16
 from DICE_tutorial.utils import cluster, gradient_graph
 import argparse
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset", help='The name of dataset: census, credit, bank, default, meps21 ', required=True)
 parser.add_argument("-sensitive_index", help='The index for sensitive features', required=True)
-parser.add_argument("-timeout", help='Max. running time', default = 3600, required=False)
 args = parser.parse_args()
 
 FLAGS = flags.FLAGS
@@ -248,7 +248,7 @@ def sh_entropy(probs,bin_thresh, base=2 ):
      
     
 def dnn_fair_testing(dataset, sens_params, model_path, cluster_num, 
-                     max_global, max_local, max_iter, epsillon, timeout):
+                     max_global, max_local, max_iter, epsillon):
     """
     
     The implementation of ADF
@@ -289,215 +289,23 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
     # build the clustering model
     clf = cluster(dataset, cluster_num)
     clusters = [np.where(clf.labels_ == i) for i in range(cluster_num)]
-
+    len_msamples = 1
+    for sens in sens_params:
+        len_msamples *= (data_config[dataset].input_bounds[sens - 1][1] - data_config[dataset].input_bounds[sens - 1][0] + 1) 
+    m_sample=[i for i in range(len_msamples)]
     # store the result of fairness testing
-   
-    global max_k
-    global start_time
-    global max_k_time
-
-    print(dataset, sens_params)
-    RQ2_table = []
-    RQ1_table = []
+    init_k_list =[]
+    max_k_list = []
+    max_k_time_list = []
+    RQ1_table =[]
     for trial in range(1):
-        print('Trial', trial)
-        if  sess._closed:
-            sess = tf.Session(config=config)
-            sess = tf.Session(config=config)
-            x = tf.placeholder(tf.float32, shape=input_shape)
-            y = tf.placeholder(tf.float32, shape=(None, nb_classes))
-            model = dnn(input_shape, nb_classes)   
-            preds = model(x)
-            saver = tf.train.Saver()
-            saver.restore(sess, model_path)
-            grad_0 = gradient_graph(x, preds)
-        global_inputs = set()
-        tot_inputs =set()
-        global_inputs_list = []
-        local_inputs = set()
-        local_inputs_list = []
-        seed_num = 0          
-        max_k_time = 0
-        max_k_time_list = []
-        init_k_list  = []
-        max_k_list = []
-        #-----------------------
-        def evaluate_local(inp):
-
-            """
-            Evaluate whether the test input after local perturbation is an individual discriminatory instance
-            :param inp: test input
-            :return: whether it is an individual discriminatory instance
-            """ 
-            global max_k
-            global max_k_time
-            global start_time
-            global time1
-            result, K ,conf = check_for_error_condition(data_config[dataset], sess, x, preds, inp, 
-                                               sens_params, input_shape, epsillon)    
-            if K > max_k:
-                max_k = K 
-                max_k_time = time.time() - start_time
-
-            dis_sample =copy.deepcopy(inp.astype('int').tolist())   
-            for sens in sens_params:
-                dis_sample[sens - 1] = 0    
-            if tuple(dis_sample) not in global_inputs and\
-                                    tuple(dis_sample) not in local_inputs:
-
-                local_inputs.add(tuple(dis_sample))
-                local_inputs_list.append(dis_sample + [time.time() - time1])
-
-            return (-1 * result)
-
-        # select the seed input for fairness testing
-        inputs = seed_test_input(clusters, min(max_global, len(X)))
-        global time1
-        time1 = time.time()  
-        for num in range(len(inputs)):
-            
-            #clear_output(wait=True)
-            start_time = time.time()
-            if time.time()-time1 > timeout:
-                break 
-            print('Input ',seed_num)
-            index = inputs[num]
-            sample = X[ index : index + 1]
-
-            # start global perturbation
-            for iter in range( max_iter + 1 ):            
-                if time.time()-time1 > timeout :
-                    break
-                m_sample = m_instance( np.array(sample) , sens_params, data_config[dataset] )
-                pred = pred_prob( sess, x, preds, m_sample , input_shape )
-                clus_dic = clustering( pred, m_sample, sens_params, epsillon )
-
-                if iter == 0:
-                    init_k = len(clus_dic) - 1
-                    max_k = init_k
-
-                if len(clus_dic) - 1 > max_k:
-                    max_k = len(clus_dic) - 1
-                    max_k_time = round((time.time() - start_time),4)
-
-                sample,n_values = global_sample_select( clus_dic, sens_params )
-                dis_sample = sample.copy()
-                for sens in sens_params:
-                    dis_sample[0][sens  - 1] = 0
-
-
-                if tuple(dis_sample[0].astype('int')) not in global_inputs and\
-                                    tuple(dis_sample[0].astype('int')) not in local_inputs:
-                    dis_flag = True
-                    global_inputs.add(tuple(dis_sample[0].astype('int')))
-                    global_inputs_list.append(dis_sample[0].astype('int').tolist())
-
-                else:
-                    dis_flag = False
-
-
-                if dis_flag and (len(clus_dic)-1 >= 2):    
-
-                    loc_x,n_values = local_sample_select(clus_dic ,sens_params )                              
-                    minimizer = {"method": "L-BFGS-B"}
-                    local_perturbation = Local_Perturbation(sess, grad_0, x, n_values, 
-                                                            sens_params, input_shape[1], 
-                                                            data_config[dataset])               
-                    basinhopping(evaluate_local, loc_x, stepsize = 1.0, 
-                                 take_step = local_perturbation, minimizer_kwargs = minimizer, 
-                                 niter = max_local)
-
-
-                if dis_flag :
-                    global_inputs_list[-1] +=  [time.time() - time1]
-
-
-                clus_dic = {}
-                if iter == max_iter:
-                    break
-
-                #Making up n_sample
-                n_sample = sample.copy()
-                for i in range(len(sens_params)):
-                    n_sample[0][sens_params[i] - 1] = n_values[i]                
-
-                # global perturbation
-
-                s_grad = sess.run(tf.sign(grad_0), feed_dict = {x: sample})
-                n_grad = sess.run(tf.sign(grad_0), feed_dict = {x: n_sample})
-
-                # find the feature with same impact
-                if np.zeros(data_config[dataset].params).tolist() == s_grad[0].tolist():
-                    g_diff = n_grad[0]
-                elif np.zeros(data_config[dataset].params).tolist() == n_grad[0].tolist():
-                    g_diff = s_grad[0]
-                else:
-                    g_diff = np.array(s_grad[0] == n_grad[0], dtype = float)                
-                for sens in sens_params:
-                    g_diff[sens - 1] = 0 
-
-                cal_grad = s_grad * g_diff
-                if np.zeros(input_shape[1]).tolist() == cal_grad.tolist()[0]:
-                    index = np.random.randint(len(cal_grad[0]) - 1)
-                    for i in range(len(sens_params) - 1, -1, -1):
-                        if index == sens_params[i] - 1 :
-                            index = index + 1
-
-                    cal_grad[0][index]  = np.random.choice([1.0, -1.0])
-
-                sample[0] = clip(sample[0] + perturbation_size * cal_grad[0], data_config[dataset]).astype("int")
-
-            seed_num += 1
-            if max_k > 1:
-                max_k_time_list.append(max_k_time)
-                init_k_list.append(init_k)
-                max_k_list.append(max_k)
-            
-        print('Search Time =', time.time()-time1)
-
-        # create the folder for storing the fairness testing result
-        if not os.path.exists('../results/'):
-            os.makedirs('../results/')
-        if not os.path.exists('../results/' + dataset + '/'):
-            os.makedirs('../results/' + dataset + '/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/'):
-            os.makedirs('../results/' + dataset + '/OurTool/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ1&2/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ1&2/')
-        if not os.path.exists('../results/' + dataset + '/OurTool/RQ1&2/' + ''.join(str(i) for i in sens_params)+'_10runs/'):
-            os.makedirs('../results/' + dataset + '/OurTool/RQ1&2/' + ''.join(str(i) for i in sens_params)+'_10runs/')
-        # storing the fairness testing result
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_'+str(trial)+'.npy', 
-                np.array(global_inputs_list))
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_'+str(trial)+'.npy', 
-                np.array(local_inputs_list))
-        total_inputs = np.concatenate((local_inputs_list,global_inputs_list), axis=0)
-        np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy',
-                total_inputs)
-        # RQ1 & RQ2
-
-        local_sam = np.array(local_inputs_list).astype('int32')
-        global_sam = np.array(global_inputs_list).astype('int32')
-        # Storing result for RQ1 table
-        print('Analyzing the search results....')
-
-        with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
-            writer = csv.writer(f)
-            for ind in range(len(global_inputs_list)):
-                m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
-                rows = m_sample.reshape((len(m_sample),input_shape[1]))
-                writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
-
-        with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
-            writer = csv.writer(f)
-            for ind in range(len(local_inputs_list)):
-                m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
-                rows = m_sample.reshape((len(m_sample),input_shape[1]))
-                writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
-        
-        df_l = pd.read_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
-        df_g = pd.read_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
-
+        global tot_df, total_inputs
+        df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
+        df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+        total_inputs = np.load('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy')
+        init_k_list.append(np.mean(total_inputs[:,input_shape[1]]))
+        max_k_list.append(np.mean(total_inputs[:,input_shape[1]+1]))
+        max_k_time_list.append(np.mean(total_inputs[:,input_shape[1]+2]))
         df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
         df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
         g_pivot = pd.pivot_table(df_g, values="label", index=list(np.setxor1d(df_g.columns[:-1] ,
@@ -505,32 +313,22 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
         l_pivot = pd.pivot_table(df_l, values="label", index=list(np.setxor1d(df_l.columns[:-1] ,
                                                                            np.array(sens_params)-1)), aggfunc=np.sum)
 
-        g_time = g_pivot.index[np.where((g_pivot['label'] > 0) & (g_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
-        l_time = l_pivot.index[np.where((l_pivot['label'] > 0) & (l_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
-        tot_time = np.sort(np.concatenate((l_time, g_time), axis=0 ))
-        print('Time to 1st ID',tot_time[0])   
-        print('time to 1000 ID',tot_time[999])
-        
+
         g_dis = (len(m_sample) - g_pivot.loc[(g_pivot['label'] > 0) & \
                                              (g_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
         l_dis = (len(m_sample) - l_pivot.loc[(l_pivot['label'] > 0) & \
                                              (l_pivot['label'] < len(m_sample))]['label'].to_numpy()).sum()
 
-        g_dis_adf = len(g_time)
-        l_dis_adf = len(l_time)
-
-
-        global_succ_adf = round((g_dis_adf / len(global_sam)) * 100, 1)
-        local_succ_adf  = round((l_dis_adf / len(local_sam)) * 100, 1)
-
-        tot_df = pd.DataFrame(total_inputs)
-        tot_df.columns=[i for i in range(input_shape[1])] + ['time']
+        tot_df = pd.DataFrame(total_inputs[:,:input_shape[1]])
         
+        tot_df.columns=[i for i in range(input_shape[1])]
+        
+
         k = []
         disc = []
         tot_df['sh_entropy'] = 0
         for sam_ind in range(total_inputs.shape[0]): 
-            
+
             m_sample = m_instance( np.array([total_inputs[:,:input_shape[1]][sam_ind]]) , sens_params, data_config[dataset] )
             pred = pred_prob( sess, x, preds, m_sample , input_shape )
             clus_dic = clustering( pred, m_sample, sens_params, epsillon )
@@ -540,16 +338,13 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
             else:
                 disc.append(0)
             k.append(len(clus_dic) - 1)
-            
+
         tot_df['k'] = k
-        time_K_greater_than_1 = tot_df['time'][np.where(tot_df['k']>1)[0][0]]
         tot_df['disc'] = disc
         tot_df['min_entropy'] = round(np.log2(tot_df['k'] ),2)
         tot_dis = tot_df.loc[tot_df['disc'] == 1]
-        tot_dis.to_csv('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_' + str(trial)+'.csv')
-        # reseting the TF graph for the next round
-        sess.close()
-        tf.reset_default_graph()
+        tot_dis.to_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_1111' + str(trial)+'.csv')
+
         haighest_k = np.sort(tot_df['k'].unique())[-3:]
         if len(haighest_k)>2:
             IK1F = np.where(tot_df['k']==haighest_k[2])[0].shape[0]
@@ -560,47 +355,28 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
             IK1F = np.where(tot_df['k']==haighest_k[1])[0].shape[0]
             IK2F = np.where(tot_df['k']==haighest_k[0])[0].shape[0]
             IK3F = 0
-        print('Global ID RQ1 =', g_dis)
-        print('local  ID RQ1  =',  l_dis)
-        print('Total loc samples  = ', len(local_sam)) 
-        print('Total glob samples = ', len(global_sam)) 
-        print('Total ID = ',g_dis + l_dis)
-        print('Total ID RQ2  = ',g_dis_adf + l_dis_adf)
-        print('Global ID RQ2  = ',g_dis_adf)
-        print('Local  ID RQ2  = ',l_dis_adf)
-
-        global_succ = round( g_dis / (len(global_sam) * \
-                             len(m_sample)) * 100,1)
-        local_succ = round(l_dis  / (len(local_sam) * \
-                             len(m_sample)) * 100,1)
-
-
-        row = [len(total_inputs)] + [np.mean(init_k_list), np.mean(max_k_list),np.mean(max_k_time_list)] + list(tot_dis[['min_entropy', 'sh_entropy']].mean()) + [time_K_greater_than_1] + [IK1F, IK2F,IK3F] 
-        RQ1_table.append(row)
-        RQ2_table.append([g_dis_adf, l_dis_adf, g_dis_adf + l_dis_adf ,local_succ_adf, tot_time[0], tot_time[999] ])
-        print('Local search success rate  = ', local_succ, '%')
-        print('Global search success rate = ', global_succ, '%')
-        print('Local search ADF success rate  = ', local_succ_adf, '%')
-        print('Global search ADF success rate = ', global_succ_adf, '%')
+        print('Run ',trial)
         
-    np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ2_10runs.npy',
-            RQ2_table)
-    np.save('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ1_10runs.npy',
-            RQ1_table)
-    with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ2_table.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['g_adf_disc', 'l_adf_disc','tot_adf_disc','local_succ_adf',
-                             'time_to_first','time_to_1000'])
-            writer.writerow(np.mean(RQ2_table,axis=0))
-            writer.writerow(np.std(RQ2_table,axis=0))
 
-    with open('../results/' + dataset + '/OurTool/RQ1&2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ1_table.csv', 'w') as f:
+        row = [len(total_inputs)] + [np.mean(init_k_list), np.mean(max_k_list),np.mean(max_k_time_list)] + list(tot_dis[['min_entropy', 'sh_entropy']].mean())  + [IK1F, IK2F,IK3F] 
+        RQ1_table.append(row)
+
+
+        
+    
+
+    np.save('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/QID_RQ1_10runs.npy',
+            RQ1_table)
+
+    with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/RQ1_table.csv', 'w') as f:
             writer = csv.writer(f)
-            writer.writerow(['tot_samples','init_k', 'max_k', 'max_k_time','min_entropy',
-                             'sh_entropy','time_K_greater_than_1', 'IK1F', 'IK2F', 'IK3F'])
+            writer.writerow(['#I','K_I', 'K_F', 'T_KF','Q_inf',
+                         'Q_1', 'IK1F', 'IK2F', 'IK3F'])
             writer.writerow(np.mean(RQ1_table,axis=0))
             writer.writerow(np.std(RQ1_table,axis=0))
-
+    
+    
+                
 def main(argv=None):
     dnn_fair_testing(dataset = FLAGS.dataset, 
                      sens_params = FLAGS.sens_params,
@@ -609,20 +385,16 @@ def main(argv=None):
                      max_global  = FLAGS.max_global,
                      max_local   = FLAGS.max_local,
                      max_iter    = FLAGS.max_iter,
-                     epsillon    = FLAGS.epsillon,
-                     timeout    = FLAGS.timeout
-                    )
+                     epsillon    = FLAGS.epsillon)
     
-
 if __name__ == '__main__':    
     sens_list = [int(i) for i in re.findall('[0-9]+', args.sensitive_index)]
-    flags.DEFINE_string("dataset", args.dataset, "the name of dataset")
+    flags.DEFINE_string("dataset",args.dataset, "the name of dataset")
     flags.DEFINE_string('model_path', '../models/', 'the path for testing model')
     flags.DEFINE_integer('cluster_num', 4, 'the number of clusters to form as well as the number of centroids to generate')
     flags.DEFINE_integer('max_global', 1000, 'maximum number of samples for global search')
     flags.DEFINE_integer('max_local', 1000, 'maximum number of samples for local search')
     flags.DEFINE_integer('max_iter', 10, 'maximum iteration of global perturbation')
-    flags.DEFINE_integer('timeout', args.timeout, 'search timeout')
     
     #if result for RQ1 table: set this to [9,8,1], if result for RQ2 table: set this one sensitive attribute each time 
     # e.g. for census dataset, set [9], [8], [1] for sex, race and age respectively
