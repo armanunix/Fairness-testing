@@ -9,16 +9,16 @@ This repository contains the tools and evaluation experiments for the paper "Inf
 Our tool is composed of two phases: 1) The search phase employs clustering and gradients to identify and generate as many instances of discrimination as possible. 2) The debugging phase utilizes a layer localizer and causal analysis to pinpoint the source of discrimination within the deep neural network.
 # Requirements
 Python 3.8
-numpy==1.22.0.
-pandas==1.5.1
-tensorflow==2.7.0
-scipy==1.4.1
-argparse==1.1
-protobuf==3.9.2
-scikit-learn==1.1.3
-aif360==0.4.0
-IPython==7.13.0
-regex
+numpy==1.22.0 </br>
+pandas==1.5.1 </br>
+tensorflow==2.7.0 </br>
+scipy==1.4.1 </br>
+argparse==1.1 </br>
+protobuf==3.9.2 </br>
+scikit-learn==1.1.3 </br>
+aif360==0.4.0 </br>
+IPython==7.13.0 </br>
+regex </br>
 # How to setup DICE
 If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run Parfait-ML. Note: the tool is substantially tested in Linux system.
 # Getting Started with an example
