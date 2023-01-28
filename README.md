@@ -6,11 +6,11 @@ Fairness Defects in Deep Neural Networks" accepted for the technical track at IC
 
 The repository includes:
 
-a Dockerfile to build the Docker script,
-a set of required libraries for running the tool on local machine,
-the source code of DICE,
-the pre-built evaluation all results: Dataset, and
-the scripts to rerun all search experiments: scripts.
+- item a [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,  
+- item a set of required libraries for running the tool on local machine,  
+- item the source code of DICE,  
+- item the pre-built evaluation all [results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg): Dataset, and  
+- item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
 # Docker File
 ```
 ```
