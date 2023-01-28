@@ -13,12 +13,16 @@ The repository includes:
 - item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
 # Docker File
 ```
+docker pull armanunix/dice:1.0.0
+docker run --rm -it
 ```
+We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that Parfait-ML's results can be easily accessed. Furthermore, we recommend to run scripts in an own [screen](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session) session so that the results can be observed during execution.
 # Tool
 Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
 amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
 phase that uses a layer localizer and causal analysis to pinpoint the root cause of discrimination
 in the internal of deep neural network.
+
 # Requirements
 Python 3.8  
 numpy==1.22.0  
