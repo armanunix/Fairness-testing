@@ -484,22 +484,22 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
             # Storing result for RQ1 table
             print('Analyzing the search results....')
 
-            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_90_'+str(trial)+'.csv', 'w') as f:
                 writer = csv.writer(f)
                 for ind in range(len(global_inputs_list)):
                     m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
                     rows = m_sample.reshape((len(m_sample),input_shape[1]))
                     writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
 
-            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+            with open('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_90_'+str(trial)+'.csv', 'w') as f:
                 writer = csv.writer(f)
                 for ind in range(len(local_inputs_list)):
                     m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
                     rows = m_sample.reshape((len(m_sample),input_shape[1]))
                     writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
 
-            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
-            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_90_'+str(trial)+'.csv',header=None)  
+            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_90_'+str(trial)+'.csv',header=None)
 
             df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
             df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
@@ -598,22 +598,22 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
             # Storing result for RQ1 table
             print('Analyzing the search results....')
 
-            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_90_'+str(trial)+'.csv', 'w') as f:
                 writer = csv.writer(f)
                 for ind in range(len(global_inputs_list)):
                     m_sample = m_instance( np.array([global_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
                     rows = m_sample.reshape((len(m_sample),input_shape[1]))
                     writer.writerows(np.append(rows,[[global_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
 
-            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv', 'w') as f:
+            with open('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_90_'+str(trial)+'.csv', 'w') as f:
                 writer = csv.writer(f)
                 for ind in range(len(local_inputs_list)):
                     m_sample = m_instance( np.array([local_inputs_list[ind][:input_shape[1]]]) , sens_params, data_config[dataset] ) 
                     rows = m_sample.reshape((len(m_sample),input_shape[1]))
                     writer.writerows(np.append(rows,[[local_inputs_list[ind][-1]] for i in range(len(m_sample))],axis=1))
 
-            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
-            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+            df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_90_'+str(trial)+'.csv',header=None)  
+            df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ2/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_90_'+str(trial)+'.csv',header=None)
 
             df_g['label'] = model_argmax(sess, x, preds, df_g.to_numpy()[:,:input_shape[1]])
             df_l['label'] = model_argmax(sess, x, preds, df_l.to_numpy()[:,:input_shape[1]])
@@ -625,10 +625,14 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
             g_time = g_pivot.index[np.where((g_pivot['label'] > 0) & (g_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
             l_time = l_pivot.index[np.where((l_pivot['label'] > 0) & (l_pivot['label'] < len(m_sample)))[0]].get_level_values(input_shape[1]).values
             tot_time = np.sort(np.concatenate((l_time, g_time), axis=0 ))
+            
+            if len(tot_time) >= 1000:
+                time_1000 = tot_time[999]
+            else:
+                time_1000 = np.nan
+                
             print('Time to 1st ID',tot_time[0])   
-            print('time to 1000 ID',tot_time[999])
-
-
+            print('time to 1000 ID',time_1000)
             g_dis_adf = len(g_time)
             l_dis_adf = len(l_time)
 
@@ -662,7 +666,7 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
 
 
 
-            RQ2_table.append([g_dis_adf + l_dis_adf ,local_succ_adf, tot_time[0], tot_time[999] ])
+            RQ2_table.append([g_dis_adf + l_dis_adf ,local_succ_adf, tot_time[0], time_1000 ])
 
             print('Local search success rate  = ', local_succ_adf, '%')
             print('Global search success rate = ', global_succ_adf, '%')

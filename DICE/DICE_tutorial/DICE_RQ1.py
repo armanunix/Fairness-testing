@@ -299,9 +299,8 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
     max_k_time_list = []
     RQ1_table =[]
     for trial in range(1):
-        global tot_df, total_inputs
-        df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_msamples_'+str(trial)+'.csv',header=None)  
-        df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_msamples_'+str(trial)+'.csv',header=None)
+        df_l = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/local_inputs_90_'+str(trial)+'.csv',header=None)  
+        df_g = pd.read_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/global_inputs_90_'+str(trial)+'.csv',header=None)
         total_inputs = np.load('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_inputs_'+str(trial)+'.npy')
         init_k_list.append(np.mean(total_inputs[:,input_shape[1]]))
         max_k_list.append(np.mean(total_inputs[:,input_shape[1]+1]))
@@ -343,7 +342,7 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
         tot_df['disc'] = disc
         tot_df['min_entropy'] = round(np.log2(tot_df['k'] ),2)
         tot_dis = tot_df.loc[tot_df['disc'] == 1]
-        tot_dis.to_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_1111' + str(trial)+'.csv')
+        tot_dis.to_csv('../results/' + dataset + '/DICE/RQ1/'+ ''.join(str(i) for i in sens_params)+'_10runs'+'/total_disc_' + str(trial)+'.csv')
 
         haighest_k = np.sort(tot_df['k'].unique())[-3:]
         if len(haighest_k)>2:
