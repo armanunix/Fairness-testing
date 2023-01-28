@@ -22,9 +22,10 @@ regex </br>
 # How to setup DICE
 Our tool, Parfait-ML, is pre-built in a Debian-based Docker image for easy use. However, if you choose to run it without the pre-built image, you will need to install the required packages and libraries. Please note that the tool has been primarily tested on Linux systems.
 # Getting Started with an example
-After succesfully setup DICE, you can try a simple example to check the basic functionality of our tool. We prepared a simple run script for census dataset with sex, race, and age as sensitive attributes
+After successfully setting up DICE, you can test its basic functionality by running a simple example. We have provided a run script for the census dataset, where sex, race, and age are used as sensitive attributes.
 
-To run the search algorithm over Census dataset:
+To use the search algorithm on the Census dataset, run the following command:
+
 ```
 cd DICE/DICE_tutorial
 python DICE_census.py
