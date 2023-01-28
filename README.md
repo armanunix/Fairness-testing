@@ -1,16 +1,7 @@
 # The Implementation of DICE
 ### An information-theoritic tool to testing and debugging fairness defects in deep Neural Network
 
-This repository provides the tool and the evaluation Experimrnts for the paper "Information-Theoretic Testing and Debugging of
-Fairness Defects in Deep Neural Networks" accepted for the technical track at ICSE'2023.
-
-The repository includes:
-
-a Dockerfile to build the Docker script,
-a set of required libraries for running the tool on local machine,
-the source code of DICE,
-the pre-built evaluation all results: Dataset, and
-the scripts to rerun all search experiments: scripts.
+This repository contains the tools and evaluation experiments for the paper "Information-Theoretic Testing and Debugging of Fairness Defects in Deep Neural Networks," which was accepted for the technical track at ICSE'2023. It includes a Dockerfile for building the Docker script, a collection of necessary libraries for running the tool on a local machine, the source code of DICE, pre-built evaluation datasets, and scripts for re-running all search experiments.
 # Docker File
 ```
 ```
