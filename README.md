@@ -1,43 +1,79 @@
 # The Implementation of DICE
 ### An information-theoritic tool to testing and debugging fairness defects in deep Neural Network
 
-This repository contains the tools and evaluation experiments for the paper "Information-Theoretic Testing and Debugging of Fairness Defects in Deep Neural Networks," which was accepted for the technical track at ICSE'2023. It includes a Dockerfile for building the Docker script, a collection of necessary libraries for running the tool on a local machine, the source code of DICE, pre-built evaluation datasets, and scripts for re-running all search experiments.
+This repository provides the tool and the evaluation Experimrnts for the paper "Information-Theoretic Testing and Debugging of
+Fairness Defects in Deep Neural Networks" accepted for the technical track at ICSE'2023.
+
+The repository includes:
+
+a Dockerfile to build the Docker script,
+a set of required libraries for running the tool on local machine,
+the source code of DICE,
+the pre-built evaluation all results: Dataset, and
+the scripts to rerun all search experiments: scripts.
 # Docker File
 ```
 ```
 # Tool
-Our tool is composed of two phases: 1) The search phase employs clustering and gradients to identify and generate as many instances of discrimination as possible. 2) The debugging phase utilizes a layer localizer and causal analysis to pinpoint the source of discrimination within the deep neural network.
+Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
+amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
+phase that uses a layer localizer and causal analysis to pinpoint the root cause of discrimination
+in the internal of deep neural network.
 # Requirements
-Python 3.8
-numpy==1.22.0 </br>
-pandas==1.5.1 </br>
-tensorflow==2.7.0 </br>
-scipy==1.4.1 </br>
-argparse==1.1 </br>
-protobuf==3.9.2 </br>
-scikit-learn==1.1.3 </br>
-aif360==0.4.0 </br>
-IPython==7.13.0 </br>
-regex </br>
+Python 3.8  
+numpy==1.22.0  
+pandas==1.5.1  
+tensorflow==2.7.0  
+scipy==1.4.1  
+argparse==1.1  
+protobuf==3.9.2  
+scikit-learn==1.1.3  
+aif360==0.4.0  
+IPython==7.13.0  
+regex
 # How to setup DICE
-Our tool, Parfait-ML, is pre-built in a Debian-based Docker image for easy use. However, if you choose to run it without the pre-built image, you will need to install the required packages and libraries. Please note that the tool has been primarily tested on Linux systems.
+If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run Parfait-ML. Note: the tool is substantially tested in Linux system.
 # Getting Started with an example
-After successfully setting up DICE, you can test its basic functionality by running a simple example. We have provided a run script for the census dataset, where sex, race, and age are used as sensitive attributes.
+After succesfully setup DICE, you can try a simple example to check the basic functionality of our tool. We prepared a simple run script for census dataset with sex, race, and age as sensitive attributes
+DICE first generates indicvidual discriminatory instances using a two-phase gradient-guided search. DICE is able to analyze the input dataset using a set of its protected attributes. Then, DICE debugging algorithm uses generated discriminatory instances of DICE search algorithm to localize the biased layer and neurons through causal analysis. Throughout the paper for the RQ1 table, we run DICE search algorithm 10 times each 1 hour. Here you can try a simple example to check the basic functionality of DICE searching/debugging in 10 minutes.
 
-To use the search algorithm on the Census dataset, run the following command:
 
+To run the search algorithm over Census dataset cosidering Sex, race, and age as the protected attributes - sensitive_index=9,8,1 for 10 minutes. Note that for RQ2 results, the argument -RQ must be set to -RQ=1. 
 ```
-cd DICE/DICE_tutorial
-python DICE_census.py
+python DICE_Search.py -dataset=census -sensitive_index=9,8,1 -timeout=600 -RQ=1
 ```
-The other models for a different dataset can be run in the same fashion.
+The result of the search will be saved to /results/census/DICE/RQ1/981_10runs/
+To run the debuging algorithm on the 200 instances of generated discrimitory instances from above command:
+```
+python DICE_Debugging.py -dataset=census -sensitive_index=9,8,1 -num_samples=200
+```
+The results of above code will be stored in /results/census/DICE/RQ3
 
-To compue the amounts of discrimination and characterize entropy, run
+The other models for a different dataset can be run in the same fashion. For example, to run the search and debugging on german credit dataset with sex and age as protected attributes:
 ```
-python entropy_census.py
+python DICE_Search.py -dataset=credit -sensitive_index=13,9 -timeout=600 -RQ=1
+python DICE_Debugging.py -dataset=credit -sensitive_index=13,9 -num_samples=200
 ```
+Here are the sensitive indices for 10 datasets we used to evaluate our tool:   
+census 9,8,1   
+compas 3,2,1   
+bank 1   
+credit 13,9   
+default 5,2   
+diabetes 8  
+heart 2,1   
+meps15 and meps16 10,2,1   
+student 3,2
 
-To run the debugging algorithm over Census dataset:
+
+
+To run the RQ2 experiments, sensitive_index argument should be one index per each run. DICE is able to handle more than one protected attributes, but to be consistent with our baselines we set one sensitive feature per each experiment. You can try a simple example on census dataset and sex feature - sensitive_index=9. Note that for RQ2 results, the argument -RQ must be set to -RQ=2.
+```
+python DICE_Search.py -dataset=census -sensitive_index=9 -timeout=30 -RQ=2
+```
+The results of the above command will be saved in /results/census/DICE/RQ2/. Results for other datasets and other sensitive features can be done in the same fashion.
+
+For RQ1 we run DICE 10 times each 1 hour for all datasets, For RQ2 we run 10 times each 15 minutes, and for RQ3 we set the number of samples(-num_samples) to 1000. The corresponding results can be found in [Results]: https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=ZAWhbJ
 ```
 python RQ3_census.py
 ```
