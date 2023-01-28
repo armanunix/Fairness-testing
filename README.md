@@ -73,7 +73,7 @@ python DICE_Search.py -dataset=census -sensitive_index=9 -timeout=30 -RQ=2
 ```
 The results of the above command will be saved in /results/census/DICE/RQ2/. Results for other datasets and other sensitive features can be done in the same fashion.
 
-For RQ1 we run DICE 10 times each 1 hour for all datasets, For RQ2 we run 10 times each 15 minutes, and for RQ3 we set the number of samples(-num_samples) to 1000. The corresponding results can be found in [Results]([https://pages.github.com/](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=ZAWhbJ)).
+For RQ1 we run DICE 10 times each 1 hour for all datasets, For RQ2 we run 10 times each 15 minutes, and for RQ3 we set the number of samples(-num_samples) to 1000. The corresponding results can be found in [Results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=ZAWhbJ).
 
 # Complete Evaluation Reproduction
 We include the script to run the search and debugging algorithms for the entire dataset (warning: it will run all experiments):
