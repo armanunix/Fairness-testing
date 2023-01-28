@@ -6,10 +6,7 @@ This repository contains the tools and evaluation experiments for the paper "Inf
 ```
 ```
 # Tool
-Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
-amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
-phase that uses a layer localizer and causal analysis to pinpoint the root cause of discrimination
-in the internal of deep neural network.
+Our tool is composed of two phases: 1) The search phase employs clustering and gradients to identify and generate as many instances of discrimination as possible. 2) The debugging phase utilizes a layer localizer and causal analysis to pinpoint the source of discrimination within the deep neural network.
 # Requirements
 Python 3.8
 numpy==1.22.0.
