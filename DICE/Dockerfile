@@ -16,5 +16,5 @@ RUN apt install -y python3 python3-pip
 RUN pip install -r Requirements.txt
 ADD Raw_data /usr/local/lib/python3.8/dist-packages/aif360/data/
 WORKDIR /root/DICE_tutorial/
-#RUN python3 DICE_Search_final.py -dataset=census -sensitive_index=9,8,1 -timeout=300
+#RUN python3 DICE_Search_final.py -dataset=census -sensitive_index=9,8,1 -timeout=600
 #RUN python DICE_Debugging.py -dataset=census -sensitive_index=9,8,1 -num_samples=200
