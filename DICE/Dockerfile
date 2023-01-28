@@ -9,7 +9,6 @@ ADD clusters /root/clusters
 ADD datasets /root/datasets
 ADD DICE_data /root/DICE_data
 ADD DICE_model /root/DICE_model
-ADD DICE_text /root/DICE_text
 ADD DICE_tutorial /root/DICE_tutorial
 ADD DICE_utils /root/DICE_utils
 ADD models /root/models
