@@ -20,7 +20,7 @@ aif360==0.4.0 </br>
 IPython==7.13.0 </br>
 regex </br>
 # How to setup DICE
-If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run Parfait-ML. Note: the tool is substantially tested in Linux system.
+Our tool, Parfait-ML, is pre-built in a Debian-based Docker image for easy use. However, if you choose to run it without the pre-built image, you will need to install the required packages and libraries. Please note that the tool has been primarily tested on Linux systems.
 # Getting Started with an example
 After succesfully setup DICE, you can try a simple example to check the basic functionality of our tool. We prepared a simple run script for census dataset with sex, race, and age as sensitive attributes
 
