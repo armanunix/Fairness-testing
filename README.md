@@ -32,7 +32,7 @@ aif360==0.4.0
 IPython==7.13.0  
 regex
 # How to setup DICE
-If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run Parfait-ML. Note: the tool is substantially tested in Linux system.
+If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run DICE. Note: the tool is substantially tested in Linux system.
 # Getting Started with an example
 After succesfully setup DICE, you can try a simple example to check the basic functionality of our tool. We prepared a simple run script for census dataset with sex, race, and age as sensitive attributes
 DICE first generates indicvidual discriminatory instances using a two-phase gradient-guided search. DICE is able to analyze the input dataset using a set of its protected attributes. Then, DICE debugging algorithm uses generated discriminatory instances of DICE search algorithm to localize the biased layer and neurons through causal analysis. Throughout the paper for the RQ1 table, we run DICE search algorithm 10 times each 1 hour. Here you can try a simple example to check the basic functionality of DICE searching/debugging in 10 minutes.
