@@ -78,17 +78,16 @@ For RQ1 we run DICE 10 times each 1 hour for all datasets, For RQ2 we run 10 tim
 # Complete Evaluation Reproduction
 We include the script to run the search and debugging algorithms for the entire dataset (warning: it will run all experiments):
 ```
-
+sh run_script_final.sh
+```
+we include this command to reproduct RQ1 expriment on census dataset and sensitive_index=9,8,1. Note that this command uses the discriminatory instances generated in our RQ1 experiment and can be found in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm)
+This folder should be copied in /results/census/DICE/ to be used by the below command:
+```
+python DICE_RQ1.py -dataset=census -sensitive_index=9,8,1
 ```
 
-The baseline tools can be found inside DAIKE baseline:
+For repoduction of RQ3 results on census dataset with our experiment results in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm):
 ```
-cd DICEDICE_baseline
+python DICE_RQ3.py -dataset=census -sensitive_index=9,8,1
 ```
-
-The data of analysis can be found in:
-```
-cd DICE/results
-```
-There is one folder for each experiments that include DAIKE and the state-of-the-art outcomes.
-[Results]: https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=ZAWhbJ
+There is one folder for each experiments that include DICE and the state-of-the-art outcomes.
