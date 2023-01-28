@@ -6,19 +6,23 @@ Fairness Defects in Deep Neural Networks" accepted for the technical track at IC
 
 The repository includes:
 
-a Dockerfile to build the Docker script,
-a set of required libraries for running the tool on local machine,
-the source code of DICE,
-the pre-built evaluation all results: Dataset, and
-the scripts to rerun all search experiments: scripts.
+- item a [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,  
+- item a set of required libraries for running the tool on local machine,  
+- item the source code of DICE,  
+- item the pre-built evaluation all [results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg): Dataset, and  
+- item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
 # Docker File
 ```
+docker pull armanunix/dice:1.0.0
+docker run --rm -it
 ```
+We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that Parfait-ML's results can be easily accessed. Furthermore, we recommend to run scripts in an own [screen](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session) session so that the results can be observed during execution.
 # Tool
 Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
 amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
 phase that uses a layer localizer and causal analysis to pinpoint the root cause of discrimination
 in the internal of deep neural network.
+
 # Requirements
 Python 3.8  
 numpy==1.22.0  
@@ -32,7 +36,7 @@ aif360==0.4.0
 IPython==7.13.0  
 regex
 # How to setup DICE
-If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run Parfait-ML. Note: the tool is substantially tested in Linux system.
+If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run DICE. Note: the tool is substantially tested in Linux system.
 # Getting Started with an example
 After succesfully setup DICE, you can try a simple example to check the basic functionality of our tool. We prepared a simple run script for census dataset with sex, race, and age as sensitive attributes
 DICE first generates indicvidual discriminatory instances using a two-phase gradient-guided search. DICE is able to analyze the input dataset using a set of its protected attributes. Then, DICE debugging algorithm uses generated discriminatory instances of DICE search algorithm to localize the biased layer and neurons through causal analysis. Throughout the paper for the RQ1 table, we run DICE search algorithm 10 times each 1 hour. Here you can try a simple example to check the basic functionality of DICE searching/debugging in 10 minutes.
