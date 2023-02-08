@@ -34,7 +34,7 @@ protobuf==3.9.2
 scikit-learn==1.1.3  
 aif360==0.4.0  
 IPython==7.13.0  
-regex
+regex==2022.10.31
 # How to setup DICE
 If you use the pre-built Docker image, the tool is already built to use in Ubuntu base. Otherwise, the installation of required packlages and libraries should be sufficient to run DICE. Note: the tool is substantially tested in Linux system.
 # Getting Started with an example
