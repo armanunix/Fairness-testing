@@ -31,7 +31,7 @@ tensorflow==2.7.0
 scipy==1.4.1  
 argparse==1.1  
 protobuf==3.9.2  
-scikit-learn==1.1.3  
+scikit-learn==0.22.2.post1 
 aif360==0.4.0  
 IPython==7.13.0  
 regex==2022.10.31
