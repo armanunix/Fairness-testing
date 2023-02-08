@@ -31,7 +31,7 @@ tensorflow==2.7.0
 scipy==1.4.1  
 argparse==1.1  
 protobuf==3.9.2  
-scikit-learn==1.1.3  
+scikit-learn==0.22.2.post1 
 aif360==0.4.0  
 IPython==7.13.0  
 regex==2022.10.31
@@ -73,7 +73,7 @@ student 3,2
 
 To run the RQ2 experiments, sensitive_index argument should be one index per each run. DICE is able to handle more than one protected attributes, but to be consistent with our baselines we set one sensitive feature per each experiment. You can try a simple example on census dataset and sex feature - sensitive_index=9. Note that for RQ2 results, the argument -RQ must be set to -RQ=2.
 ```
-python3 DICE_Search.py -dataset=census -sensitive_index=9 -timeout=30 -RQ=2
+python3 DICE_Search.py -dataset=census -sensitive_index=9 -timeout=300 -RQ=2
 ```
 The results of the above command will be saved in /results/census/DICE/RQ2/. Results for other datasets and other sensitive features can be done in the same fashion.
 
