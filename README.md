@@ -16,7 +16,7 @@ The repository includes:
 docker pull armanunix/dice:1.0.0
 docker run --rm -it armanunix/dice:1.0.0
 ```
-We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that Parfait-ML's results can be easily accessed. Furthermore, we recommend to run scripts in an own [screen](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session) session so that the results can be observed during execution.
+We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that DICE's results can be easily accessed. Furthermore, we recommend to run scripts in an own [screen](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session) session so that the results can be observed during execution.
 # Tool
 Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
 amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
