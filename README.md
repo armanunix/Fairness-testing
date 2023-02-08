@@ -16,14 +16,13 @@ The repository includes:
 docker pull armanunix/dice:1.0.0
 docker run --rm -it armanunix/dice:1.0.0
 ```
-We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that DICE's results can be easily accessed. Below commands create a docker volume from DICE:1.0.0 image. Any results generated in the container will be stored in the host directory "/var/lib/docker/volumes/DICE_VOLUME/_data" as well.
+We recommend to use Docker's [volume](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) feature to connect the docker container to the own file system so that DICE's results can be easily accessed. Below commands create a docker volume and Run a container using the DICE:1.0.0 image and mount the volume to it.
 ```
 sudo docker volume create DICE_VOLUME
 sudo docker run -it --name=DICE_CONT --mount source=DICE_VOL,destination=/root/results armanunix/dice:1.0.0
 ```
+Now, any results generated in the container will be stored in the host directory "/var/lib/docker/volumes/DICE_VOLUME/_data"
 
-
-Furthermore, we recommend to run scripts in an own [screen](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session) session so that the results can be observed during execution.
 # Tool
 Our tool consists of two steps: 1) the search phase uses clustering and gradients to maximize the
 amounts of discrimination and generate as many discrimination instance as possible 2) the debugging
