@@ -2,7 +2,7 @@ from distutils.version import LooseVersion
 import numpy as np
 import os
 from six.moves import xrange
-import tensorflow.compat.v1 as tf 
+import tensorflow.compat.v1 as tf
 tf.compat.v1.disable_eager_execution()
 import time
 import warnings
@@ -22,14 +22,14 @@ def model_loss(y, model, mean=True):
     :return: return mean of loss if True, otherwise return vector with per
              sample loss
     """
-    
+
     op = model.op
     if op.type == "Softmax":
         logits, = op.inputs
     else:
         logits = model
 
-    out = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y)
+    out = tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=y)
 
     if mean:
         out = tf.reduce_mean(out)
@@ -277,7 +277,7 @@ def model_prediction(sess, x, predictions, samples, feed=None, batch_size=128):
     """
     nb_classes = 2
     nb_batches = int(math.ceil(float(samples.shape[0]) / batch_size))
-  
+
     pros_all=np.zeros(shape=(samples.shape[0],nb_classes), dtype='float32')
 
     for batch in range(nb_batches):
@@ -297,12 +297,11 @@ def model_prediction(sess, x, predictions, samples, feed=None, batch_size=128):
 
 def layer_out(sess , model , samples):
     """
-    Report the outpout of neurons in model layers 
+    Report the outpout of neurons in model layers
     :param sess: TF session
     :param model: model
     :param samples: numpy array with input samples (dims must match x)
     :return: the output probability
     """
-    
-    return sess.run(model.fprop(samples))
 
+    return sess.run(model.fprop(samples))
