@@ -20,7 +20,8 @@ The repository includes:
 - [models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models) includes trained models checkpoints,  
 - [Requirements](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Requirements.txt) set of required libraries for running the tool on local machine, 
 - [Results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg) includes the results of all experimrnts,  
-- [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments: 
+- [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments,  
+- [License](https://github.com/armanunix/Fairness-testing/blob/main/LICENSE) file.  
 
 # Docker repository
 ```
