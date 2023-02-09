@@ -112,4 +112,4 @@ For repoduction of RQ3 results on census dataset with our experiment results in 
 ```
 python3 DICE_RQ3.py -dataset=census -sensitive_index=9,8,1
 ```
-There is one folder for each experiments that include DICE and the state-of-the-art outcomes.
+There is one folder for each experiments that includes DICE and the state-of-the-art outcomes.
