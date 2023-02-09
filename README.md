@@ -13,7 +13,7 @@ The repository includes:
 - [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data) includes functions to load datasets,     
 - [DICE_model](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_model) includes the implementation of DNN model,    
 - [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial) includes the source code of DICE, 
-- [DICE_utils](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_utils) includes utility function of DICE,    
+- [DICE_utils](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_utils) includes utility functions of DICE,    
 - [Raw_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/Raw_data/raw) includes raw dataset files(meps15/16),    
 - [Clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters) includes pickles from KMeans clustering,   
 - [Datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets) includes pre-processed datasets,   
