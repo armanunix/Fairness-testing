@@ -6,21 +6,26 @@ Fairness Defects in Deep Neural Networks" accepted for the technical track at IC
 
 The repository includes:
 
-- item a [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,  
-- item a set of required libraries for running the tool on local machine,  
+- item a   
+- item a  
 - item the source code of DICE,  
 - item the pre-built evaluation all [results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg): Dataset, and  
 - item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
 
 # The structure of the repository 
-- [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline)  
-- [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data)  
-- [DICE_model](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_model)  
-- [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial)  
-- [Raw_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/Raw_data/raw)  
-- [clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters)  
-- [datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets)  
-- [models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models)
+- [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,
+- [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline) includes the implementation of our baselinse,    
+- [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data) includes functions to load datasets,     
+- [DICE_model](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_model) includes the implementation of DNN model,    
+- [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial) includes the source code of DICE, 
+- [DICE_utils](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_utils) includes utility function of DICE,    
+- [Raw_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/Raw_data/raw) includes raw dataset files(meps15/16),    
+- [clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters) includes pickles from KMeans clustering,   
+- [datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets) includes pre-processed datasets,   
+- [models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models) includes trained models checkpoints,  
+- [Requirements](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Requirements.txt) set of required libraries for running the tool on local machine, 
+- [Results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg) includes the results of all experimrnts,  
+- [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments: 
 
 # Docker File
 ```
