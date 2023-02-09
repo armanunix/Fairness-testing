@@ -4,15 +4,10 @@
 This repository provides the tool and the evaluation Experimrnts for the paper "Information-Theoretic Testing and Debugging of
 Fairness Defects in Deep Neural Networks" accepted for the technical track at ICSE'2023.
 
+# The structure of the repository 
+
 The repository includes:
 
-- item a   
-- item a  
-- item the source code of DICE,  
-- item the pre-built evaluation all [results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg): Dataset, and  
-- item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
-
-# The structure of the repository 
 - [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,
 - [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline) includes the implementation of our baselinse,    
 - [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data) includes functions to load datasets,     
@@ -27,7 +22,7 @@ The repository includes:
 - [Results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg) includes the results of all experimrnts,  
 - [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments: 
 
-# Docker File
+# Docker repository
 ```
 docker pull armanunix/dice:1.0.0
 docker run --rm -it armanunix/dice:1.0.0
