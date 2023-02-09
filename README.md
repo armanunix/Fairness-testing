@@ -11,6 +11,17 @@ The repository includes:
 - item the source code of DICE,  
 - item the pre-built evaluation all [results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg): Dataset, and  
 - item the scripts to rerun all search experiments: [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh).
+
+# The structure of the repository 
+- [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline)  
+- [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data)  
+- [DICE_model](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_model)  
+- [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial)  
+- [Raw_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/Raw_data/raw)  
+- [clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters)  
+- [datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets)  
+- [models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models)
+
 # Docker File
 ```
 docker pull armanunix/dice:1.0.0
