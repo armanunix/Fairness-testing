@@ -15,12 +15,12 @@ The repository includes:
 - [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial) includes the source code of DICE, 
 - [DICE_utils](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_utils) includes utility function of DICE,    
 - [Raw_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/Raw_data/raw) includes raw dataset files(meps15/16),    
-- [clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters) includes pickles from KMeans clustering,   
-- [datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets) includes pre-processed datasets,   
-- [models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models) includes trained models checkpoints,  
+- [Clusters](https://github.com/armanunix/Fairness-testing/tree/main/DICE/clusters) includes pickles from KMeans clustering,   
+- [Datasets](https://github.com/armanunix/Fairness-testing/tree/main/DICE/datasets) includes pre-processed datasets,   
+- [Models](https://github.com/armanunix/Fairness-testing/tree/main/DICE/models) includes trained models checkpoints,  
 - [Requirements](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Requirements.txt) set of required libraries for running the tool on local machine, 
 - [Results](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EqN3oXLgnppGuxsgdMqBH54BuDSfFgUUX0xS5E5O-aMBQw?e=pMY2Eg) includes the results of all experimrnts,  
-- [script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments,  
+- [Script](https://github.com/armanunix/Fairness-testing/blob/main/DICE/DICE_tutorial/run_script_final.sh) file to rerun all experiments,  
 - [License](https://github.com/armanunix/Fairness-testing/blob/main/LICENSE) file.  
 
 # Docker repository
