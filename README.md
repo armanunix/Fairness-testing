@@ -1,8 +1,8 @@
 # The Implementation of DICE
 ### An information-theoritic tool to testing and debugging fairness defects in deep Neural Network
 
-This repository provides the tool and the evaluation Experimrnts for the paper "Information-Theoretic Testing and Debugging of
-Fairness Defects in Deep Neural Networks" accepted for the technical track at ICSE'2023.
+This repository provides the tool and the evaluation Experimrnts for the paper ["Information-Theoretic Testing and Debugging of
+Fairness Defects in Deep Neural Networks"](https://tizpaz.github.io/icse2023-paper892.pdf) accepted for the technical track at ICSE'2023.
 
 # The structure of the repository 
 
