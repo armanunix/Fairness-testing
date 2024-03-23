@@ -1,7 +1,7 @@
 # The Implementation of DICE
-### An information-theoritic tool to testing and debugging fairness defects in deep Neural Network
+### An information-theoritic tool for testing and debugging fairness defects in deep Neural Network
 
-This repository provides the tool and the evaluation Experimrnts for the paper ["Information-Theoretic Testing and Debugging of
+This repository provides the tool and the evaluation Experiments for the paper ["Information-Theoretic Testing and Debugging of
 Fairness Defects in Deep Neural Networks"](https://www.computer.org/csdl/proceedings-article/icse/2023/570100b571/1OM4zHEXjfa), ICSE'2023.
 
 # The structure of the repository 
@@ -9,7 +9,7 @@ Fairness Defects in Deep Neural Networks"](https://www.computer.org/csdl/proceed
 The repository includes:
 
 - [Dockerfile](https://github.com/armanunix/Fairness-testing/blob/main/DICE/Dockerfile) to build the Docker script,
-- [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline) includes the implementation of our baselinse,    
+- [DICE_baseline](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_baseline) includes the implementation of our baselines,    
 - [DICE_data](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_data) includes functions to load datasets,     
 - [DICE_model](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_model) includes the implementation of DNN model,    
 - [DICE_tutorial](https://github.com/armanunix/Fairness-testing/tree/main/DICE/DICE_tutorial) includes the source code of DICE, 
@@ -60,16 +60,16 @@ After succesfully setup DICE, you can try a simple example to check the basic fu
 DICE first generates indicvidual discriminatory instances using a two-phase gradient-guided search. DICE is able to analyze the input dataset using a set of its protected attributes. Then, DICE debugging algorithm uses generated discriminatory instances of DICE search algorithm to localize the biased layer and neurons through causal analysis. Throughout the paper for the RQ1 table, we run DICE search algorithm 10 times each 1 hour. Here you can try a simple example to check the basic functionality of DICE searching/debugging in 10 minutes.
 
 
-To run the search algorithm over Census dataset cosidering Sex, race, and age as the protected attributes - sensitive_index=9,8,1 for 10 minutes. Note that for RQ2 results, the argument -RQ must be set to -RQ=1. 
+To run the search algorithm over Census dataset considering Sex, race, and age as the protected attributes - sensitive_index=9,8,1 for 10 minutes. Note that for RQ2 results, the argument -RQ must be set to -RQ=2. 
 ```
 python3 DICE_Search.py -dataset=census -sensitive_index=9,8,1 -timeout=600 -RQ=1
 ```
 The result of the search will be saved to /results/census/DICE/RQ1/981_10runs/
-To run the debuging algorithm on the 200 instances of generated discrimitory instances from above command:
+To run the debugging algorithm on the 200 instances of generated discriminatory instances from the above command:
 ```
 python3 DICE_Debugging.py -dataset=census -sensitive_index=9,8,1 -num_samples=200
 ```
-The results of above code will be stored in /results/census/DICE/RQ3
+The results of the above code will be stored in /results/census/DICE/RQ3
 
 The other models for a different dataset can be run in the same fashion. For example, to run the search and debugging on german credit dataset with sex and age as protected attributes:
 ```
@@ -89,7 +89,7 @@ student 3,2
 
 
 
-To run the RQ2 experiments, sensitive_index argument should be one index per each run. DICE is able to handle more than one protected attributes, but to be consistent with our baselines we set one sensitive feature per each experiment. You can try a simple example on census dataset and sex feature - sensitive_index=9. Note that for RQ2 results, the argument -RQ must be set to -RQ=2.
+To run the RQ2 experiments, sensitive_index argument should be one index per each run. DICE is able to handle more than one protected attribute, but to be consistent with our baselines we set one sensitive feature per each experiment. You can try a simple example on census dataset and sex feature - sensitive_index=9. Note that for RQ2 results, the argument -RQ must be set to -RQ=2.
 ```
 python3 DICE_Search.py -dataset=census -sensitive_index=9 -timeout=300 -RQ=2
 ```
@@ -102,14 +102,14 @@ We include the script to run the search and debugging algorithms for the entire 
 ```
 sh run_script_final.sh
 ```
-we include this command to reproduct RQ1 expriment on census dataset and sensitive_index=9,8,1. Note that this command uses the discriminatory instances generated in our RQ1 experiment and can be found in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm)
+we include this command to reproduce the RQ1 experiment on census dataset and sensitive_index=9,8,1. Note that this command uses the discriminatory instances generated in our RQ1 experiment and can be found in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm)
 This folder should be copied in /results/census/DICE/ to be used by the below command:
 ```
 python3 DICE_RQ1.py -dataset=census -sensitive_index=9,8,1
 ```
 
-For repoduction of RQ3 results on census dataset with our experiment results in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm):
+For reproduction of RQ3 results on census dataset with our experiment results in [RQ1](https://minersutep-my.sharepoint.com/:f:/g/personal/vmonjezi_miners_utep_edu/EmUeDc0IaFxCpFflp0C-8AMBN_vmV2guny4JMZhBtAYOXQ?e=rMz2Mm):
 ```
 python3 DICE_RQ3.py -dataset=census -sensitive_index=9,8,1
 ```
-There is one folder for each experiments that includes DICE and the state-of-the-art outcomes.
+There is one folder for each experiment that includes DICE and the state-of-the-art outcomes.
