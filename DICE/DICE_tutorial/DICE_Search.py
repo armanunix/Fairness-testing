@@ -253,7 +253,7 @@ def dnn_fair_testing(dataset, sens_params, model_path, cluster_num,
                      max_global, max_local, max_iter, epsillon, timeout, RQ):
     """
     
-    The implementation of ADF
+    The implementation of DICE
     :param dataset: the name of testing dataset
     :param sensitive_param: the index of sensitive feature
     :param model_path: the path of testing model
